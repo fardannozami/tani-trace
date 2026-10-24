@@ -89,7 +89,7 @@ cd apps/web && npx tsc --noEmit && bun run lint && bun run test && bun run build
 - [x] Deploy script `contracts/script/Deploy.s.sol` + `setup.sh` +
   `.env.example` (root dan `apps/web`).
 - [x] Deploy ke Monad Testnet dan `deployments/monadTestnet.json`
-  (token/funding/faucet, deployer, `deployedAtBlock` = `73725698`).
+  (token/funding/faucet, deployer, `deployedAtBlock` = `73746544`).
 - [x] `apps/web/.env.local` berisi RPC, tiga alamat, `NEXT_PUBLIC_DEPLOY_BLOCK`,
   gateway IPFS, `PINATA_JWT`, `UPLOAD_SIGNING_SECRET`, opsional
   `GEMINI_API_KEY`; Next.js perlu di-restart setelah pengisian.
@@ -109,6 +109,7 @@ cd apps/web && npx tsc --noEmit && bun run lint && bun run test && bun run build
   dan `next build` lulus.
 - [x] Kontrak ter-deploy di Monad Testnet + `deployments/monadTestnet.json`.
 - [x] Frontend production live di `https://www.tanitrace.web.id/`.
+- [x] Source contract deployment terbaru terverifikasi via Sourcify Monad.
 - [ ] Frontend terhubung wallet, membaca state, dan mengirim semua transaksi
   (env sudah terisi; tinggal uji manual E2E).
 - [ ] Upload + verifikasi hash manifest IPFS berjalan (`PINATA_JWT` sudah terisi;

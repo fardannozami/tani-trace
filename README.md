@@ -57,8 +57,10 @@ on-chain dan tidak pernah memblokir transaksi.
 | | |
 | --- | --- |
 | 🌐 **Aplikasi** | [www.tanitrace.web.id](https://www.tanitrace.web.id/) · [jalankan lokal](#-menjalankan-di-lokal-langkah-demi-langkah) |
-| 🔗 **Deploy** | Monad Testnet, blok `73725698` · [deployments/monadTestnet.json](deployments/monadTestnet.json) |
+| 🔗 **Deploy** | Monad Testnet, blok `73746544` · [deployments/monadTestnet.json](deployments/monadTestnet.json) |
 | 📜 **Kontrak** | `contracts/src/` — `TANIToken`, `TANIFaucet`, `TaniTraceFunding` |
+| 🧑‍⚖️ **Judging** | [Evidence checklist](docs/judging-checklist.md) |
+| 📣 **Build in public** | [Posting & demo kit](docs/build-in-public-kit.md) |
 | ✅ **Hasil uji** | `forge test` **106 lulus** · Vitest **52 lulus** · `tsc`, ESLint, `next build` lulus |
 | ⛓️ **Jaringan** | Monad Testnet · chain ID `10143` · gas dibayar dalam **MON** |
 | 🪙 **Token** | TNC ("Tani Token"), 18 desimal, supply tetap 1.000.000, tanpa owner |
@@ -320,25 +322,25 @@ ini dengan viem (`apps/web/lib/manifest.ts`) dan membandingkannya dengan
 
 | Kontrak | Alamat | Explorer |
 | --- | --- | --- |
-| TANIToken (TNC) | `0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3` | [lihat](https://testnet.monadexplorer.com/address/0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3) |
-| TaniTraceFunding | `0xE4b10b2b7185042F671Aee32aa3E941544A8675d` | [lihat](https://testnet.monadexplorer.com/address/0xE4b10b2b7185042F671Aee32aa3E941544A8675d) |
-| TANIFaucet | `0xBF28435F8654ece0A0C37a3476b682dFd596Eb52` | [lihat](https://testnet.monadexplorer.com/address/0xBF28435F8654ece0A0C37a3476b682dFd596Eb52) |
+| TANIToken (TNC) | `0x29171a923080d86e84bBAb98E12BE517bA432ac1` | [lihat](https://testnet.monadexplorer.com/address/0x29171a923080d86e84bBAb98E12BE517bA432ac1) |
+| TaniTraceFunding | `0x3dbCEB5dE079012A32662E8FeaF74E6b06B13F0A` | [lihat](https://testnet.monadexplorer.com/address/0x3dbCEB5dE079012A32662E8FeaF74E6b06B13F0A) |
+| TANIFaucet | `0x647d112774F76a2ceC6C409ce823158D8d2a4Aba` | [lihat](https://testnet.monadexplorer.com/address/0x647d112774F76a2ceC6C409ce823158D8d2a4Aba) |
 
-Deployer `0x7210716f612812374Fa2FF4cf6b3467f55ffd8fC`, blok `73725698`.
+Deployer `0x7210716f612812374Fa2FF4cf6b3467f55ffd8fC`, blok `73746544`.
 Token: `name()` = `Tani Token`, `symbol()` = `TNC`, `totalSupply()` = 1.000.000,
 faucet `claimAmount()` = 100 TNC.
 
 Nilai untuk `apps/web/.env.local` (hanya alamat publik, bukan rahasia):
 
 ```env
-NEXT_PUBLIC_TOKEN_ADDRESS=0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3
-NEXT_PUBLIC_FUNDING_ADDRESS=0xE4b10b2b7185042F671Aee32aa3E941544A8675d
-NEXT_PUBLIC_FAUCET_ADDRESS=0xBF28435F8654ece0A0C37a3476b682dFd596Eb52
-NEXT_PUBLIC_DEPLOY_BLOCK=73725698
+NEXT_PUBLIC_TOKEN_ADDRESS=0x29171a923080d86e84bBAb98E12BE517bA432ac1
+NEXT_PUBLIC_FUNDING_ADDRESS=0x3dbCEB5dE079012A32662E8FeaF74E6b06B13F0A
+NEXT_PUBLIC_FAUCET_ADDRESS=0x647d112774F76a2ceC6C409ce823158D8d2a4Aba
+NEXT_PUBLIC_DEPLOY_BLOCK=73746544
 ```
 
-Source code belum diverifikasi di explorer; verifikasi opsional (lihat langkah 4
-di bawah) tidak memengaruhi penggunaan aplikasi. Jika Anda mendeploy ulang,
+Source code deployment terbaru sudah terverifikasi via Sourcify Monad. Jika
+Anda mendeploy ulang, jalankan kembali perintah verifikasi di bawah dan
 ganti semua nilai di atas dengan hasil `deployments/monadTestnet.json` yang baru.
 
 ## 💻 Menjalankan di lokal (langkah demi langkah)
@@ -484,15 +486,28 @@ NEXT_PUBLIC_FAUCET_ADDRESS=0x...
 NEXT_PUBLIC_DEPLOY_BLOCK=12345678
 ```
 
-Verifikasi source (opsional). Endpoint Sourcify Monad harus diberikan eksplisit;
-entri `[etherscan]` sengaja tidak dipakai karena URL Sourcify bukan API
-Etherscan-compatible (dulu memunculkan `ERROR etherscan: ... Cannot GET /` di
-setiap deploy, padahal deploy tetap berhasil):
+Verifikasi source deployment terbaru sebelum demo penjurian. Endpoint Sourcify
+Monad harus diberikan eksplisit; entri `[etherscan]` sengaja tidak dipakai
+karena URL Sourcify bukan API Etherscan-compatible:
 
 ```bash
-forge verify-contract <ALAMAT> src/TaniTraceFunding.sol:TaniTraceFunding \
+cd contracts
+forge verify-contract 0x29171a923080d86e84bBAb98E12BE517bA432ac1 \
+  src/TANIToken.sol:TANIToken --chain-id 10143 \
   --verifier sourcify \
-  --verifier-url https://sourcify-api-monad.blockvision.org/
+  --verifier-url https://sourcify-api-monad.blockvision.org/ --watch
+
+forge verify-contract 0x3dbCEB5dE079012A32662E8FeaF74E6b06B13F0A \
+  src/TaniTraceFunding.sol:TaniTraceFunding --chain-id 10143 \
+  --constructor-args "$(cast abi-encode 'constructor(address)' 0x29171a923080d86e84bBAb98E12BE517bA432ac1)" \
+  --verifier sourcify \
+  --verifier-url https://sourcify-api-monad.blockvision.org/ --watch
+
+forge verify-contract 0x647d112774F76a2ceC6C409ce823158D8d2a4Aba \
+  src/TANIFaucet.sol:TANIFaucet --chain-id 10143 \
+  --constructor-args "$(cast abi-encode 'constructor(address,uint256)' 0x29171a923080d86e84bBAb98E12BE517bA432ac1 100000000000000000000)" \
+  --verifier sourcify \
+  --verifier-url https://sourcify-api-monad.blockvision.org/ --watch
 ```
 
 ### 5. Jalankan frontend

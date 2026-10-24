@@ -26,7 +26,7 @@ contract Deploy is Script {
         vm.stopBroadcast();
 
         console2.log("TaniTrace v2 berhasil dideploy.");
-        console2.log("  network          : Monad Testnet (chainId 10143)");
+        console2.log("  chainId          :", block.chainid);
         console2.log("  TANIToken        :", address(token));
         console2.log("  TaniTraceFunding :", address(funding));
         console2.log("  TANIFaucet       :", address(faucet));

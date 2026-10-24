@@ -15,4 +15,5 @@ fs_permissions = [
 
 [rpc_endpoints]
 monad_testnet = "${MONAD_TESTNET_RPC}"
+monad_mainnet = "${MONAD_MAINNET_RPC}"
 
