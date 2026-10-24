@@ -17,6 +17,9 @@ export async function POST(req: NextRequest) {
   const expiresAt = Number(form.get("expiresAt") || 0);
 
   if (!file) return NextResponse.json({ error: "BAD_FILE" }, { status: 400 });
+  if (!Number.isSafeInteger(size) || size < 0 || file.size !== size || file.name !== name) {
+    return NextResponse.json({ error: "BAD_FILE_METADATA" }, { status: 400 });
+  }
 
   const auth = await verifyAuth({ address, nonce, token, signature, size, name, expiresAt }, `TaniTrace upload\nnonce:${nonce}\ntoken:${token}\nsize:${size}\nname:${name}`);
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status || 401 });

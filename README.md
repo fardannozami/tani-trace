@@ -462,6 +462,18 @@ forge script script/Deploy.s.sol --rpc-url monad_testnet                 # dry-r
 forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast     # kirim
 ```
 
+Atau dari root repo, deploy sekaligus memperbarui alamat kontrak di
+`apps/web/.env.local`:
+
+```bash
+bash scripts/deploy-and-update-env.sh
+```
+
+Script tersebut membaca `contracts/.env`, mengirim deployment ke Monad
+Testnet, lalu hanya memperbarui `NEXT_PUBLIC_TOKEN_ADDRESS`,
+`NEXT_PUBLIC_FUNDING_ADDRESS`, `NEXT_PUBLIC_FAUCET_ADDRESS`, dan
+`NEXT_PUBLIC_DEPLOY_BLOCK` tanpa mengubah secret frontend lainnya.
+
 Output memuat tiga alamat dan blok deploy. Script juga menulis
 `deployments/monadTestnet.json`. Salin ke `apps/web/.env.local`:
 

@@ -66,4 +66,18 @@ describe("auth unggah", () => {
     expect(res.ok).toBe(false);
     expect(res.error).toBe("INVALID_NONCE");
   });
+
+  it("menolak replay setelah nonce dikonsumsi", async () => {
+    const { nonce, token, expiresAt } = issueNonce(account.address);
+    const size = 1;
+    const name = "a.png";
+    const signed = message(nonce, token, size, name);
+    const signature = await account.signMessage({ message: signed });
+    const body = { address: account.address, nonce, token, signature, size, name, expiresAt };
+
+    expect((await verifyAuth(body, signed)).ok).toBe(true);
+    const replay = await verifyAuth(body, signed);
+    expect(replay.ok).toBe(false);
+    expect(replay.error).toBe("INVALID_NONCE");
+  });
 });

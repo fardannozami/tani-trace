@@ -32,6 +32,7 @@ export default function RequestDetail() {
   const { data: voted } = useVote(requestId, address);
   const actions = useCampaignActions();
   const now = useNowSeconds();
+  const paymentExpiry = request ? Number(request.votingDeadline) + 7 * 24 * 60 * 60 : 0;
 
   useEffect(() => {
     if (!publicClient) return;
@@ -129,6 +130,9 @@ export default function RequestDetail() {
 
         {request.status === 1 && isConnected && address === request.farmer ? (
           <button type="button" className="button" style={{ marginTop: 16 }} onClick={() => actions.payDisbursement(requestId)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Bayar pencairan</button>
+        ) : null}
+        {request.status === 1 && now !== null && now > paymentExpiry ? (
+          <button type="button" className="button secondary" style={{ marginTop: 16 }} onClick={() => actions.expireApprovedDisbursement(requestId)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Batalkan pencairan yang kedaluwarsa</button>
         ) : null}
       </main>
     </>

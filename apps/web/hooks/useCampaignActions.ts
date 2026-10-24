@@ -15,6 +15,8 @@ export function useCampaignActions() {
       execute({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "claimRefund", args: [id] }),
     payDisbursement: (requestId: bigint) =>
       execute({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "payDisbursement", args: [requestId] }),
+    expireApprovedDisbursement: (requestId: bigint) =>
+      execute({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "expireApprovedDisbursement", args: [requestId] }),
     completeCampaign: (id: bigint) =>
       execute({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "completeCampaign", args: [id] }),
     requestDisbursement: (id: bigint, amount: bigint, purpose: string, evidenceCid: string) =>

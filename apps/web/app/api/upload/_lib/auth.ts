@@ -26,15 +26,13 @@ export async function verifyAuth(body: AuthBody, expectedMessage: string): Promi
 
   const normalizedAddress = String(address).toLowerCase();
   const rec = store.get(nonce);
-  // Record nonce boleh tidak ada bila request ditangani proses lain (dev
-  // worker / serverless). Bukti keaslian tetap HMAC token + tanda tangan
-  // wallet, bukan keberadaan record.
-  if (rec) {
-    if (rec.address !== normalizedAddress) return { ok: false, error: "UNAUTHORIZED", status: 401 };
-    if (rec.expires < Date.now()) {
-      store.delete(nonce);
-      return { ok: false, error: "INVALID_NONCE", status: 401 };
-    }
+  // A nonce is a one-time capability. HMAC alone is not enough because the
+  // same signed request could otherwise be replayed until expiresAt.
+  if (!rec) return { ok: false, error: "INVALID_NONCE", status: 401 };
+  if (rec.address !== normalizedAddress) return { ok: false, error: "UNAUTHORIZED", status: 401 };
+  if (rec.expires < Date.now()) {
+    store.delete(nonce);
+    return { ok: false, error: "INVALID_NONCE", status: 401 };
   }
 
   const expiresAt = Number(body.expiresAt) || rec?.expires;

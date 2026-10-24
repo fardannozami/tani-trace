@@ -595,6 +595,29 @@ contract TaniTraceFundingTest is Test {
         funding.completeCampaign(id);
     }
 
+    function test_expireApprovedDisbursement_releasesCampaignLock() public {
+        uint256 id = _activateCampaign();
+        vm.prank(farmer);
+        uint256 rid = funding.requestDisbursement(id, 10 ether, "purpose", "QmCid");
+        vm.prank(alice);
+        funding.vote(rid, true);
+        vm.prank(bob);
+        funding.vote(rid, true);
+        vm.warp(block.timestamp + 2 days);
+        funding.finalizeRequest(rid);
+
+        vm.expectRevert(TaniTraceFunding.PaymentStillOpen.selector);
+        funding.expireApprovedDisbursement(rid);
+
+        vm.warp(block.timestamp + funding.PAYMENT_PERIOD() + 1);
+        funding.expireApprovedDisbursement(rid);
+        assertEq(uint256(_req(rid).status), uint256(TaniTraceFunding.RequestStatus.EXPIRED));
+        assertEq(funding.approvedRequestId(id), 0);
+
+        vm.prank(farmer);
+        funding.requestDisbursement(id, 10 ether, "purpose2", "QmCid2");
+    }
+
     function test_completeCampaign_nonFarmer_reverts() public {
         uint256 id = _activateCampaign();
         vm.prank(alice);

@@ -12,6 +12,9 @@ contract TaniTraceFunding is ReentrancyGuard {
     enum RequestStatus { PENDING, APPROVED, REJECTED, EXPIRED, PAID }
 
     uint256 public constant VOTING_PERIOD = 1 days;
+    // Approved requests must be paid within this window or they can be
+    // released by anyone, allowing the farmer to submit a new request.
+    uint256 public constant PAYMENT_PERIOD = 7 days;
     uint256 public constant QUORUM_BPS = 5_000;
     uint256 public constant BPS_DENOMINATOR = 10_000;
     uint256 public constant MAX_TITLE_LENGTH = 96;
@@ -63,6 +66,7 @@ contract TaniTraceFunding is ReentrancyGuard {
     error RequestNotFound();
     error StringLengthExceeded();
     error FeeOnTransfer();
+    error PaymentStillOpen();
 
     constructor(IERC20 token_) { token = token_; }
 
@@ -183,6 +187,20 @@ contract TaniTraceFunding is ReentrancyGuard {
         c.releasedTotal += r.amount;
         token.safeTransfer(r.farmer, r.amount);
         emit DisbursementPaid(requestId, r.campaignId, r.farmer, r.amount);
+    }
+
+    /// @notice Release an approved request that the farmer failed to pay.
+    /// @dev This does not move funds; it only makes the escrow available for a
+    /// subsequent request after the payment window has elapsed.
+    function expireApprovedDisbursement(uint256 requestId) external {
+        if (requestId == 0 || requestId > requestCount) revert RequestNotFound();
+        Request storage r = requests[requestId];
+        if (r.status != RequestStatus.APPROVED) revert InvalidStatus();
+        if (block.timestamp <= r.votingDeadline + PAYMENT_PERIOD) revert PaymentStillOpen();
+
+        r.status = RequestStatus.EXPIRED;
+        approvedRequestId[r.campaignId] = 0;
+        emit RequestFinalized(requestId, r.campaignId, r.status, r.yesWeight, r.noWeight);
     }
 
     function claimRefund(uint256 id) external nonReentrant {
