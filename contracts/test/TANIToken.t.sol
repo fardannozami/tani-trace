@@ -22,7 +22,7 @@ contract TANITokenTest is Test {
 
     function test_Metadata() public view {
         assertEq(token.name(), "Tani Token");
-        assertEq(token.symbol(), "TANI");
+        assertEq(token.symbol(), "TNC");
         assertEq(token.decimals(), 18);
     }
 

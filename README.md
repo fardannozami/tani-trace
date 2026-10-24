@@ -7,7 +7,7 @@
 <p>
 <a href="https://github.com/fardannozami/tani-trace"><img src="https://img.shields.io/badge/repo-GitHub-0b1d15?style=for-the-badge&logo=github" alt="Repo GitHub"></a>
 <a href="https://docs.monad.xyz/developer-essentials/testnet"><img src="https://img.shields.io/badge/Monad-Testnet%20%C2%B7%2010143-836EF9?style=for-the-badge" alt="Monad Testnet"></a>
-<img src="https://img.shields.io/badge/Foundry-95%20test-1B1B1B?style=for-the-badge" alt="95 Foundry tests">
+<img src="https://img.shields.io/badge/Foundry-105%20test-1B1B1B?style=for-the-badge" alt="105 Foundry tests">
 <img src="https://img.shields.io/badge/Frontend-38%20test-2c6a48?style=for-the-badge" alt="38 frontend tests">
 </p>
 
@@ -59,7 +59,7 @@ on-chain dan tidak pernah memblokir transaksi.
 | 🌐 **Aplikasi** | Jalankan lokal: `http://localhost:3000` (lihat [panduan](#-menjalankan-di-lokal-langkah-demi-langkah)) |
 | 🔗 **Deploy** | Monad Testnet, blok `73725698` · [deployments/monadTestnet.json](deployments/monadTestnet.json) |
 | 📜 **Kontrak** | `contracts/src/` — `TANIToken`, `TANIFaucet`, `TaniTraceFunding` |
-| ✅ **Hasil uji** | `forge test` **95 lulus** · Vitest **38 lulus** · `tsc`, ESLint, `next build` lulus |
+| ✅ **Hasil uji** | `forge test` **105 lulus** · Vitest **38 lulus** · `tsc`, ESLint, `next build` lulus |
 | ⛓️ **Jaringan** | Monad Testnet · chain ID `10143` · gas dibayar dalam **MON** |
 | 🪙 **Token** | TNC ("Tani Token"), 18 desimal, supply tetap 1.000.000, tanpa owner |
 | 🧾 **Testnet saja** | TNC tidak punya nilai uang dan tidak bisa ditukar |
@@ -84,7 +84,7 @@ frontend recomputes the manifest hash and compares it with the on-chain value. A
 optional Gemini-based pre-check is advisory only: it is stored inside the IPFS
 manifest, excluded from the hash, and never blocks uploads, transactions, or
 on-chain logic. There is no admin, no pause, no upgrade path, and no permanent
-backend or database. Tests: 95 Foundry (unit, fuzz, invariant) and 38 frontend
+backend or database. Tests: 105 Foundry (unit, fuzz, invariant) and 38 frontend
 (Vitest). The contracts are deployed on Monad Testnet (see
 `deployments/monadTestnet.json`); the frontend is not hosted yet and runs locally.
 </details>
@@ -549,12 +549,12 @@ diverifikasi ulang**, karena diunggah oleh pemohon.
 ## 🧪 Test
 
 ```bash
-cd contracts && forge build && forge test    # 95 test Foundry
+cd contracts && forge build && forge test    # 105 test Foundry
 cd apps/web && bun run test                  # 38 test Vitest
 cd apps/web && bun run typecheck && bun run lint && bun run build
 ```
 
-Foundry (95) mencakup: pendanaan sukses/aktivasi, deadline habis + refund, akses
+Foundry (105) mencakup: pendanaan sukses/aktivasi, deadline habis + refund, akses
 tanpa hak, nominal tidak valid dan escrow kurang, kontribusi melebihi sisa target,
 fee-on-transfer, voting non-investor dan dobel, kuorum dengan pembulatan ke atas,
 mayoritas YES/NO/seri, finalisasi sebelum deadline, pencairan dobel, refund dobel,
@@ -572,7 +572,7 @@ advisory.
 ## 🗂️ Struktur repo
 
 ```text
-contracts/   Foundry: src/ (3 kontrak), test/ (95 test), script/ (Deploy, setup.sh)
+contracts/   Foundry: src/ (3 kontrak), test/ (105 test), script/ (Deploy, setup.sh)
 apps/web/    Next.js App Router
   app/        9 halaman + 4 route API (upload, nonce, manifest, advisory)
   components/ UI campaign & ui

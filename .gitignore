@@ -12,3 +12,9 @@ apps/web/.env.local
 .DS_Store
 *.tsbuildinfo
 apps/web/tsconfig.tsbuildinfo
+
+# Secrets — jangan pernah commit
+.env
+**/.env
+!.env.example
+!**/.env.example
