@@ -60,7 +60,7 @@ export function ShareCampaignCard({ url, title, className }: ShareCampaignCardPr
         </div>
         {hostKind === "local" ? (
           <div className="tt-share-note tt-share-note-local" role="note">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style={{ flex: "none", marginTop: 2 }}><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "none", marginTop: 2 }}><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg>
             <p>
               <strong>QR ini hanya berlaku di komputer Anda.</strong>
               URL memakai <code style={{ fontSize: "inherit" }}>localhost</code>, jadi tidak bisa dibuka dari perangkat lain.
@@ -69,7 +69,7 @@ export function ShareCampaignCard({ url, title, className }: ShareCampaignCardPr
           </div>
         ) : hostKind === "lan" ? (
           <div className="tt-share-note tt-share-note-lan" role="note">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style={{ flex: "none", marginTop: 2 }}><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" style={{ flex: "none", marginTop: 2 }}><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></svg>
             <p>
               <strong>Berlaku di jaringan lokal.</strong>
               Perangkat lain harus berada di Wi-Fi/jaringan yang sama dengan server ini untuk membuka tautan.

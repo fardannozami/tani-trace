@@ -78,7 +78,7 @@ export function ErrorMessage({ error, onRetry }: ErrorMessageProps) {
       `}</style>
       <div role="alert" className="tt-error">
         <span className="tt-error-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 6.5v7M12 17.5v.01"/></svg>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><path d="M12 6.5v7M12 17.5v.01"/></svg>
         </span>
         <div className="tt-error-body">
           <p className="tt-error-title">{TITLES[category]}</p>
