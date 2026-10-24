@@ -23,6 +23,7 @@ contract TaniTraceFunding is ReentrancyGuard {
     uint256 public constant MAX_PAGE_SIZE = 100;
 
     IERC20 public immutable token;
+
     uint256 public campaignCount;
     uint256 public requestCount;
 
@@ -35,6 +36,10 @@ contract TaniTraceFunding is ReentrancyGuard {
     mapping(uint256 => mapping(address => bool)) public voted;
     mapping(uint256 => mapping(address => bool)) public refunded;
     mapping(uint256 => uint256[]) public campaignRequestIds;
+    // Satu pengajuan aktif (pending) dan satu pengajuan APPROVED belum dibayar per campaign.
+    mapping(uint256 => uint256) public pendingRequestId;
+    mapping(uint256 => uint256) public approvedRequestId;
+
     // Satu pengajuan aktif (pending) dan satu pengajuan APPROVED belum dibayar per campaign.
     mapping(uint256 => uint256) public pendingRequestId;
     mapping(uint256 => uint256) public approvedRequestId;
