@@ -1,8 +1,6 @@
 {
   "chainId": 10143,
-  "deployedAtBlock": 73725698,
-  "deployer": "0x7210716f612812374Fa2FF4cf6b3467f55ffd8fC",
-  "faucet": "0xBF28435F8654ece0A0C37a3476b682dFd596Eb52",
-  "funding": "0xE4b10b2b7185042F671Aee32aa3E941544A8675d",
-  "token": "0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3"
+  "deployedAtBlock": 73745303,
+  "deployer": "0x359F896D1e96a8797d36C5B0D934a695ceF75cD8",
+  "token": "0x847C451784A2d2CA3Ae0B43A4B016113dd5fc33E"
 }
