@@ -54,12 +54,18 @@ export default function Campaigns() {
     <>
       <Navigation />
       <main className="page">
-        <div className="eyebrow">Explore</div>
-        <h1>Campaign pertanian</h1>
+        <div className="page-intro">
+          <div>
+            <div className="eyebrow">Marketplace pendanaan</div>
+            <h1>Tanam harapan,<br /><em>tumbuhkan dampak.</em></h1>
+            <p className="lead page-lead">Pilih proyek pertanian yang ingin kamu dukung. Semua kontribusi, progres, dan keputusan pencairan dapat dilihat bersama.</p>
+          </div>
+          <div className="explore-stat"><span className="stat-icon">✦</span><strong>{data?.length ?? 0}</strong><span>proyek ditemukan</span></div>
+        </div>
         {!isConfigured ? (
           <div className="notice">Kontrak belum dikonfigurasi. Isi .env.local dan deploy contract.</div>
         ) : null}
-        <div style={{ marginTop: 16, display: "flex", gap: 8, flexWrap: "wrap" }} role="group" aria-label="Filter status">
+        <div className="filter-bar" role="group" aria-label="Filter status">
           {[
             { label: "Semua", value: undefined },
             { label: "Pendanaan", value: CampaignStatus.FUNDING },
@@ -78,7 +84,7 @@ export default function Campaigns() {
             </button>
           ))}
         </div>
-        <section className="grid" style={{ marginTop: 24 }}>
+        <section className="grid campaign-grid">
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} showProgress />)
           ) : error ? (
@@ -105,7 +111,7 @@ export default function Campaigns() {
           )}
         </section>
         {isConfigured ? (
-          <div style={{ marginTop: 24, display: "flex", gap: 8 }}>
+          <div className="pagination-bar">
             <button type="button" className="button secondary" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}>Sebelumnya</button>
             <button type="button" className="button secondary" disabled={!hasMore || (data?.length ?? 0) < PAGE_SIZE} onClick={() => setOffset(offset + PAGE_SIZE)}>Berikutnya</button>
           </div>
