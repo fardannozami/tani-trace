@@ -445,11 +445,14 @@ cast balance <alamat-di-atas> --rpc-url https://testnet-rpc.monad.xyz
 | `PINATA_JWT` | upload | JWT Pinata (server-only) |
 | `PINATA_GATEWAY` | upload | gateway Pinata (server-only) |
 | `UPLOAD_SIGNING_SECRET` | upload | secret HMAC untuk nonce/token (server-only) |
+| `UPSTASH_REDIS_REST_URL` | upload | URL REST Upstash untuk nonce serverless |
+| `UPSTASH_REDIS_REST_TOKEN` | upload | token REST Upstash (server-only) |
 | `GEMINI_API_KEY` | opsional | kosong = advisory dilewati, alur tetap jalan |
 | `GEMINI_MODEL` | opsional | default `gemini-2.5-flash` |
 
 > Variabel `NEXT_PUBLIC_*` ikut terkirim ke browser. Jangan pernah menaruh secret
 > di prefix itu. Env dibaca saat startup — **restart** dev server setelah diubah.
+> Di Vercel, isi kedua variabel Upstash pada environment Production lalu redeploy.
 
 ### 4. Deploy kontrak ke Monad Testnet
 

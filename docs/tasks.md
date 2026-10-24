@@ -91,7 +91,7 @@ cd apps/web && npx tsc --noEmit && bun run lint && bun run test && bun run build
 - [x] Deploy ke Monad Testnet dan `deployments/monadTestnet.json`
   (token/funding/faucet, deployer, `deployedAtBlock` = `73746544`).
 - [x] `apps/web/.env.local` berisi RPC, tiga alamat, `NEXT_PUBLIC_DEPLOY_BLOCK`,
-  gateway IPFS, `PINATA_JWT`, `UPLOAD_SIGNING_SECRET`, opsional
+  gateway IPFS, `PINATA_JWT`, `UPLOAD_SIGNING_SECRET`, Upstash Redis, opsional
   `GEMINI_API_KEY`; Next.js perlu di-restart setelah pengisian.
 
 ## Dokumentasi

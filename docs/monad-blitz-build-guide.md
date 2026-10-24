@@ -41,6 +41,8 @@ NEXT_PUBLIC_IPFS_GATEWAY=https://gateway.pinata.cloud
 PINATA_JWT=<pinata-jwt>
 PINATA_GATEWAY=https://gateway.pinata.cloud
 UPLOAD_SIGNING_SECRET=<random-server-secret>
+UPSTASH_REDIS_REST_URL=<upstash-rest-url>
+UPSTASH_REDIS_REST_TOKEN=<upstash-rest-token>
 GEMINI_API_KEY=<gemini-api-key-opsional>
 GEMINI_MODEL=gemini-2.5-flash
 ```

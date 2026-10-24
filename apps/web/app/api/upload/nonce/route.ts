@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { issueNonce } from "../_lib/nonce-store";
+import { hasSharedStore, issueNonce } from "../_lib/nonce-store";
 
 export async function POST(req: NextRequest) {
   const { address } = await req.json().catch(() => ({}));
@@ -7,5 +7,8 @@ export async function POST(req: NextRequest) {
   if (!process.env.UPLOAD_SIGNING_SECRET) {
     return NextResponse.json({ error: "UPLOAD_NOT_CONFIGURED" }, { status: 503 });
   }
-  return NextResponse.json(issueNonce(String(address)));
+  if (process.env.VERCEL && !hasSharedStore()) {
+    return NextResponse.json({ error: "UPLOAD_STORE_NOT_CONFIGURED" }, { status: 503 });
+  }
+  return NextResponse.json(await issueNonce(String(address)));
 }

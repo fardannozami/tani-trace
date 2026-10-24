@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { verifyMessage } from "viem";
-import { consumeNonce, store } from "./nonce-store";
+import { consumeNonce, getNonce } from "./nonce-store";
 
 const SECRET_MAX_TTL_MS = 5 * 60 * 1000;
 
@@ -25,13 +25,13 @@ export async function verifyAuth(body: AuthBody, expectedMessage: string): Promi
   if (!address || !nonce || !token || !signature) return { ok: false, error: "UNAUTHORIZED", status: 401 };
 
   const normalizedAddress = String(address).toLowerCase();
-  const rec = store.get(nonce);
+  const rec = await getNonce(nonce);
   // A nonce is a one-time capability. HMAC alone is not enough because the
   // same signed request could otherwise be replayed until expiresAt.
   if (!rec) return { ok: false, error: "INVALID_NONCE", status: 401 };
   if (rec.address !== normalizedAddress) return { ok: false, error: "UNAUTHORIZED", status: 401 };
   if (rec.expires < Date.now()) {
-    store.delete(nonce);
+    await consumeNonce(nonce);
     return { ok: false, error: "INVALID_NONCE", status: 401 };
   }
 
@@ -44,6 +44,6 @@ export async function verifyAuth(body: AuthBody, expectedMessage: string): Promi
   if (token !== expected) return { ok: false, error: "INVALID_TOKEN", status: 401 };
   const ok = await verifyMessage({ address: address as `0x${string}`, message: expectedMessage, signature: signature as `0x${string}` });
   if (!ok) return { ok: false, error: "INVALID_SIGNATURE", status: 401 };
-  consumeNonce(nonce);
+  await consumeNonce(nonce);
   return { ok: true };
 }

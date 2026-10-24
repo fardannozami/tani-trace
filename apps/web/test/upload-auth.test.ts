@@ -15,7 +15,7 @@ describe("auth unggah", () => {
   });
 
   it("token issuance dan verifikasi konsisten untuk alamat checksummed", async () => {
-    const { nonce, token, expiresAt } = issueNonce(account.address);
+    const { nonce, token, expiresAt } = await issueNonce(account.address);
     const size = 1234;
     const name = "bukti.png";
     const signature = await account.signMessage({ message: message(nonce, token, size, name) });
@@ -24,7 +24,7 @@ describe("auth unggah", () => {
   });
 
   it("token tetap valid saat alamat ditulis huruf besar semua", async () => {
-    const { nonce, token, expiresAt } = issueNonce(account.address.toUpperCase());
+    const { nonce, token, expiresAt } = await issueNonce(account.address.toUpperCase());
     const size = 10;
     const name = "a.png";
     const signature = await account.signMessage({ message: message(nonce, token, size, name) });
@@ -33,7 +33,7 @@ describe("auth unggah", () => {
   });
 
   it("menolak token yang bukan HMAC server", async () => {
-    const { nonce, expiresAt } = issueNonce(account.address);
+    const { nonce, expiresAt } = await issueNonce(account.address);
     const token = "0".repeat(64);
     const size = 1;
     const name = "a.png";
@@ -45,7 +45,7 @@ describe("auth unggah", () => {
 
   it("menolak tanda tangan dari wallet lain", async () => {
     const other = privateKeyToAccount("0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba");
-    const { nonce, token, expiresAt } = issueNonce(account.address);
+    const { nonce, token, expiresAt } = await issueNonce(account.address);
     const size = 1;
     const name = "a.png";
     const signature = await other.signMessage({ message: message(nonce, token, size, name) });
@@ -55,7 +55,7 @@ describe("auth unggah", () => {
   });
 
   it("menolak token yang sudah kedaluwarsa", async () => {
-    const { nonce, token } = issueNonce(account.address);
+    const { nonce, token } = await issueNonce(account.address);
     const size = 1;
     const name = "a.png";
     const signature = await account.signMessage({ message: message(nonce, token, size, name) });
@@ -68,7 +68,7 @@ describe("auth unggah", () => {
   });
 
   it("menolak replay setelah nonce dikonsumsi", async () => {
-    const { nonce, token, expiresAt } = issueNonce(account.address);
+    const { nonce, token, expiresAt } = await issueNonce(account.address);
     const size = 1;
     const name = "a.png";
     const signed = message(nonce, token, size, name);
