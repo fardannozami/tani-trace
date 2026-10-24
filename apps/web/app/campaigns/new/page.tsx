@@ -40,6 +40,20 @@ export default function NewCampaign() {
     return null;
   }
 
+  function fillDummy() {
+    const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const localDeadline = new Date(future.getTime() - future.getTimezoneOffset() * 60_000)
+      .toISOString()
+      .slice(0, 16);
+    setTitle("Pupuk Organik Musim Tanam");
+    setCrop("Padi IR64");
+    setLocation("Sleman, DI Yogyakarta");
+    setPlan("Pembelian pupuk organik dan biaya tenaga kerja untuk satu musim tanam. Bukti pembelian dan progres lapangan akan diunggah pada setiap pengajuan pencairan.");
+    setTarget("1000");
+    setDeadline(localDeadline);
+    setLocalError(null);
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLocalError(null);
@@ -74,6 +88,12 @@ export default function NewCampaign() {
       <main className="page">
         <div className="eyebrow">Farmer workspace</div>
         <h1>Buat campaign baru</h1>
+        <button type="button" className="button secondary" onClick={fillDummy} style={{ marginBottom: 8 }}>
+          Isi contoh dummy
+        </button>
+        <small style={{ display: "block", color: "var(--muted)", maxWidth: 640 }}>
+          Mengisi data demo saja. Transaksi baru dikirim setelah Anda menekan “Buat campaign”.
+        </small>
         {!isConfigured ? <div className="notice">Kontrak belum dikonfigurasi.</div> : null}
         {localError ? <ErrorMessage error={localError} /> : null}
         {error ? <ErrorMessage error={error} onRetry={reset} /> : null}
