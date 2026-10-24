@@ -367,6 +367,45 @@ ada **di dalam** `contracts/`.
 | `FAUCET_CLAIM_AMOUNT` | tidak | TNC per klaim (default `100`) |
 | `DEPLOYMENT_OUT` | tidak | path output deploy (default `../deployments/monadTestnet.json`) |
 
+#### Dari mana `PRIVATE_KEY`?
+
+Private key **berasal dari wallet Anda sendiri** — Monad dan faucet tidak
+menerbitkannya. Jangan pakai wallet utama yang berisi aset sungguhan; buat akun
+khusus testnet.
+
+**Cara A — ekspor dari MetaMask**
+
+1. Buka MetaMask → pilih akun (idealnya akun baru khusus testnet).
+2. Titik tiga → **Account details** → **Show private key** → masukkan password.
+3. Salin, lalu tempel di `contracts/.env` sebagai `PRIVATE_KEY=0x...`.
+
+**Cara B — buat akun sekali pakai dengan Foundry**
+
+```bash
+cast wallet new
+# Address:     0x...
+# Private key: 0x...
+```
+
+Simpan private key ke `contracts/.env`, lalu kirim MON testnet ke **Address**
+yang tercetak (faucet mengirim MON ke alamat, bukan ke private key).
+
+| Istilah | Isi | Dipakai di sini? |
+| --- | --- | --- |
+| **Private key** | 64 karakter hex (`0x...`), menguasai satu akun | ✅ isi `PRIVATE_KEY` |
+| **Secret recovery phrase** (12/24 kata) | menguasai **semua** akun di wallet | ❌ jangan ditempel ke mana pun |
+
+Cek dulu bahwa key dan alamat cocok, dan alamat itu punya MON (jalankan dari root
+repo):
+
+```bash
+cast wallet address --private-key "$(grep '^PRIVATE_KEY=' contracts/.env | cut -d= -f2-)"
+cast balance <alamat-di-atas> --rpc-url https://testnet-rpc.monad.xyz
+```
+
+> Private key = akses penuh ke akun. Jangan pernah mengirimkannya lewat chat,
+> screenshot, issue, atau commit. `contracts/.env` sudah di-gitignore.
+
 **`apps/web/.env.local`** (dipakai frontend):
 
 | Variabel | Wajib | Arti |
@@ -392,7 +431,8 @@ Butuh MON testnet di wallet deployer (lihat
 [Coba sekarang](#-coba-sekarang) langkah 3). `contracts/.env` **harus ada** dan
 berisi `PRIVATE_KEY` (64 karakter hex, boleh dengan atau tanpa awalan `0x`).
 Foundry hanya memuat `.env` dari folder tempat `forge` dijalankan, yaitu
-`contracts/`.
+`contracts/`. Belum punya private key? Lihat
+[Dari mana `PRIVATE_KEY`](#dari-mana-private_key).
 
 ```bash
 cd contracts
