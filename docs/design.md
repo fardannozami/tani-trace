@@ -10,8 +10,8 @@ manifest; Next.js hanya membaca state/event dan menjadi adapter upload.
 
 | Kontrak | Berkas | Peran |
 |---|---|---|
-| `TANIToken` | `contracts/src/TANIToken.sol` | ERC-20 "TANI", supply tetap 1.000.000e18 (18 desimal), dicetak sekali ke deployer, tanpa mint publik, tanpa owner/admin/pause. |
-| `TANIFaucet` | `contracts/src/TANIFaucet.sol` | Saldo TANI pra-isi, satu klaim per alamat, `claimAmount` immutable, `ReentrancyGuard`. |
+| `TANIToken` | `contracts/src/TANIToken.sol` | ERC-20 "TNC", supply tetap 1.000.000e18 (18 desimal), dicetak sekali ke deployer, tanpa mint publik, tanpa owner/admin/pause. |
+| `TANIFaucet` | `contracts/src/TANIFaucet.sol` | Saldo TNC pra-isi, satu klaim per alamat, `claimAmount` immutable, `ReentrancyGuard`. |
 | `TaniTraceFunding` | `contracts/src/TaniTraceFunding.sol` | Campaign, kontribusi ERC-20, transisi status, pengajuan pencairan, voting 24 jam, finalisasi permissionless, pencairan satu kali, refund, `completeCampaign`, view ber-paginasi (maks 100), tanpa owner/admin/pause. |
 
 Kontrak tidak mempercayai frontend. Semua aturan bisnis (kuorum, mayoritas,
@@ -178,7 +178,7 @@ menggugurkan verifikasi; ia hanya konteks tambahan bagi pembaca.
 | `apps/web/hooks/useCampaignActions.ts` | Aksi turunan (finalize campaign, claim refund, pay disbursement, complete campaign). |
 | `apps/web/hooks/useAuditFeed.ts` | Feed audit dari event on-chain dengan rentang blok. |
 | `apps/web/hooks/useIPFS.ts` | Upload/ambil berkas, panggil advisory, susun/pin manifest JSON. Mengekspor `MAX_UPLOAD_BYTES` (4 MB) dan `MAX_BUNDLE_BYTES` (8 MB). |
-| `apps/web/hooks/useTokenInfo.ts` | Saldo TANI, faucet. |
+| `apps/web/hooks/useTokenInfo.ts` | Saldo TNC, faucet. |
 | `apps/web/hooks/useWallet.ts` | Koneksi wallet, cek Monad Testnet. |
 | `apps/web/hooks/useNowSeconds.ts` | Waktu sekarang untuk countdown. |
 
@@ -254,7 +254,7 @@ transaksi.
   masuk `manifestHash`.
 - Rate limit advisory hanya in-memory per proses server; bukan perlindungan
   kuota produksi.
-- TANI tidak memiliki nilai uang; pengguna membayar gas dalam MON.
+- TNC tidak memiliki nilai uang; pengguna membayar gas dalam MON.
 - Query event RPC publik dapat memiliki batas rentang blok; frontend memakai
   `NEXT_PUBLIC_DEPLOY_BLOCK` dan pagination.
 - Sisa escrow yang tidak pernah diajukan tetap berada di contract dan tidak

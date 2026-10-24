@@ -23,4 +23,4 @@ cd contracts
 forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast
 ```
 
-Set alamat hasil deploy ke `apps/web/.env.local`. Kontrak ini adalah boilerplate yang belum diaudit; TANI hanya token simulasi testnet tanpa nilai uang.
+Set alamat hasil deploy ke `apps/web/.env.local`. Kontrak ini adalah boilerplate yang belum diaudit; TNC hanya token simulasi testnet tanpa nilai uang.

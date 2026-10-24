@@ -54,8 +54,8 @@ hasil investasi.
 -   Memungkinkan petani membuat campaign pendanaan dengan target dan
     deadline.
 -   Memungkinkan investor mendanai campaign menggunakan token ERC-20
-    TANI simulasi di Monad Testnet.
--   Menyediakan faucet TANI testnet dengan satu klaim per alamat untuk
+    TNC simulasi di Monad Testnet.
+-   Menyediakan faucet TNC testnet dengan satu klaim per alamat untuk
     keperluan demo.
 -   Memungkinkan petani mengajukan pencairan sesuai kebutuhan selama
     masa tanam.
@@ -94,7 +94,7 @@ campaign setelah siklus budidaya selesai.
 
 ### Investor / Kontributor
 
-Menyetor TANI ke campaign, memeriksa pengajuan dan bukti, lalu memilih
+Menyetor TNC ke campaign, memeriksa pengajuan dan bukti, lalu memilih
 YES atau NO untuk setiap pengajuan pencairan.
 
 ### Pengamat Publik
@@ -120,11 +120,11 @@ harus di masa depan.
 
 ### 6.2 Mendanai Campaign
 
-1.  Investor menghubungkan wallet dan mengklaim TANI testnet dari
-    faucet. Jumlah klaim default 100 TANI per alamat, satu kali.
+1.  Investor menghubungkan wallet dan mengklaim TNC testnet dari
+    faucet. Jumlah klaim default 100 TNC per alamat, satu kali.
 2.  Investor menyetujui allowance agar contract pendanaan dapat
-    menggunakan TANI.
-3.  Investor menyetor TANI selama campaign berstatus `FUNDING` dan
+    menggunakan TNC.
+3.  Investor menyetor TNC selama campaign berstatus `FUNDING` dan
     sebelum deadline. Nominal kontribusi tidak boleh melebihi sisa
     target.
 4.  Contract mencatat kontribusi per wallet dan memperbarui
@@ -271,7 +271,7 @@ status akhir.
 
 ## 8. Aturan Pendanaan dan Voting
 
--   Unit nominal adalah TANI dengan 18 decimals.
+-   Unit nominal adalah TNC dengan 18 decimals.
 -   Durasi voting: 24 jam (`VOTING_PERIOD`).
 -   Kuorum: 50% dari `totalRaised`, dibulatkan ke atas
     (`QUORUM_BPS = 5000`, `BPS_DENOMINATOR = 10000`).
@@ -279,7 +279,7 @@ status akhir.
 -   Bobot voting: kontribusi investor yang tercatat pada campaign
     terkait.
 -   Satu suara per alamat untuk setiap pengajuan.
--   Bobot tidak didasarkan pada saldo TANI wallet saat ini.
+-   Bobot tidak didasarkan pada saldo TNC wallet saat ini.
 -   Campaign hanya menerima kontribusi saat `FUNDING`; setelah `ACTIVE`,
     bobot voting tidak berubah.
 -   Hanya boleh ada satu pengajuan yang sedang voting dan satu pengajuan
@@ -292,8 +292,8 @@ status akhir.
 
 ### 9.1 `TANIToken.sol`
 
--   ERC-20 bernama "TANI" dengan simbol "TANI" dan 18 decimals.
--   Supply tetap 1.000.000 TANI (`INITIAL_SUPPLY`), dicetak sekali saat
+-   ERC-20 bernama "Tani Token" dengan simbol "TNC" dan 18 decimals.
+-   Supply tetap 1.000.000 TNC (`INITIAL_SUPPLY`), dicetak sekali saat
     deployment kepada `initialHolder` (deployer).
 -   Tidak ada fungsi mint publik, owner, admin, atau pause.
 -   Token tidak memiliki nilai dunia nyata atau penukaran yang
@@ -301,11 +301,11 @@ status akhir.
 
 ### 9.2 `TANIFaucet.sol`
 
--   Menyimpan alokasi TANI yang diisi saat deployment oleh script deploy
-    (default 200.000 TANI).
+-   Menyimpan alokasi TNC yang diisi saat deployment oleh script deploy
+    (default 200.000 TNC).
 -   Satu klaim per alamat (`hasClaimed`).
 -   Jumlah klaim immutable, ditetapkan saat deployment (default 100
-    TANI), dan harus lebih besar dari nol.
+    TNC), dan harus lebih besar dari nol.
 -   Memancarkan `Claimed(account, amount)`; error: `AlreadyClaimed`,
     `FaucetEmpty`, `ZeroAddress`, `ZeroClaimAmount`.
 -   Pengguna tetap membutuhkan MON untuk gas.
@@ -454,12 +454,12 @@ Halaman yang tersedia:
 | `/` | Landing page dan ringkasan protokol. |
 | `/campaigns` | Daftar campaign dengan paginasi dan filter status. |
 | `/campaigns/new` | Form pembuatan campaign. |
-| `/campaigns/[campaignId]` | Detail campaign, kontribusi dengan allowance TANI, kartu bagikan QR/tautan, daftar pengajuan, finalisasi campaign, pencairan pengajuan `APPROVED`, dan penutupan campaign. |
+| `/campaigns/[campaignId]` | Detail campaign, kontribusi dengan allowance TNC, kartu bagikan QR/tautan, daftar pengajuan, finalisasi campaign, pencairan pengajuan `APPROVED`, dan penutupan campaign. |
 | `/dashboard` | Dashboard petani: campaign milik wallet, unggah bukti, dan ajukan pencairan. |
 | `/campaigns/[campaignId]/requests/[requestId]` | Detail pengajuan: bukti IPFS, verifikasi hash manifest, bobot voting, countdown, voting, finalisasi pengajuan, hasil, dan pencairan. |
 | `/audit` | Feed audit dari event on-chain dengan hash transaksi dan tautan explorer. |
 | `/refund` | Klaim refund untuk campaign `FAILED`. |
-| `/faucet` | Klaim TANI testnet satu kali per alamat. |
+| `/faucet` | Klaim TNC testnet satu kali per alamat. |
 
 Kebutuhan lintas halaman:
 
@@ -469,7 +469,7 @@ Kebutuhan lintas halaman:
     ditindaklanjuti.
 -   Semua penulisan contract melalui `useContractTx`: cek chain,
     `estimateGas` + 10% gas limit, tanpa retry otomatis.
--   Nominal ditampilkan dalam TANI; gas ditampilkan dalam MON.
+-   Nominal ditampilkan dalam TNC; gas ditampilkan dalam MON.
 -   Data dashboard berasal dari pembacaan state dan event on-chain; cache
     lokal opsional dan bukan sumber kebenaran.
 
@@ -480,7 +480,7 @@ Kebutuhan lintas halaman:
 -   Interaksi wallet dan kontrak: wagmi 2 + viem 2.
 -   Smart contract: Solidity 0.8.24, Foundry, OpenZeppelin.
 -   Chain: Monad Testnet, chainId 10143.
--   Token: ERC-20 TANI simulasi.
+-   Token: ERC-20 TNC simulasi.
 -   Bukti: IPFS melalui Pinata.
 -   Sumber data: state kontrak dan event on-chain.
 -   Backend/database: tidak diperlukan secara permanen.
@@ -509,7 +509,7 @@ Kebutuhan lintas halaman:
 | `GEMINI_MODEL` | server-only, opsional | Default `gemini-2.5-flash` |
 | `PRIVATE_KEY` | `contracts/.env` | Private key deployer |
 | `MONAD_TESTNET_RPC` | `contracts/.env` | RPC untuk Foundry |
-| `FAUCET_CLAIM_AMOUNT` | `contracts/.env`, opsional | TANI per klaim (default 100) |
+| `FAUCET_CLAIM_AMOUNT` | `contracts/.env`, opsional | TNC per klaim (default 100) |
 | `FAUCET_ALLOCATION` | `contracts/.env`, opsional | Alokasi faucet (default 200000) |
 | `DEPLOYMENT_OUT` | `contracts/.env`, opsional | Path output deploy (default `../deployments/monadTestnet.json`) |
 
@@ -545,7 +545,7 @@ relevan diberi index agar feed audit dapat difilter.
 ### Campaign dan pendanaan
 
 -   Petani dapat membuat campaign dengan target dan deadline.
--   Investor dapat berkontribusi dengan TANI dan bobot kontribusinya
+-   Investor dapat berkontribusi dengan TNC dan bobot kontribusinya
     tercatat dengan benar.
 -   Kontribusi tidak boleh melebihi sisa target.
 -   Campaign menjadi `ACTIVE` ketika target tercapai.
@@ -642,9 +642,9 @@ cd apps/web && bunx next build
 
 ## 16. Narasi Demo
 
-1.  Investor mengklaim TANI di `/faucet`.
+1.  Investor mengklaim TNC di `/faucet`.
 2.  Petani membuat campaign untuk kebutuhan selama masa tanam.
-3.  Dua atau lebih wallet investor menyetor TANI.
+3.  Dua atau lebih wallet investor menyetor TNC.
 4.  Target tercapai dan campaign menjadi active.
 5.  Petani mengunggah bukti ke IPFS (opsional: muncul kartu
     "Pemeriksaan awal (advisory)") lalu mengajukan nominal untuk benih

@@ -1,6 +1,6 @@
 # Skrip Demo TaniTrace (2–3 Menit)
 
-Skrip runnable untuk demo v2 di Monad Testnet. Semua data sintetis; TANI adalah
+Skrip runnable untuk demo v2 di Monad Testnet. Semua data sintetis; TNC adalah
 token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ## 0. Checklist persiapan
@@ -8,8 +8,8 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 - [ ] Alamat ter-deploy di `apps/web/.env.local`: `NEXT_PUBLIC_TOKEN_ADDRESS`,
       `NEXT_PUBLIC_FUNDING_ADDRESS`, `NEXT_PUBLIC_FAUCET_ADDRESS`,
       `NEXT_PUBLIC_DEPLOY_BLOCK`.
-- [ ] Faucet terisi TANI (deploy script mentransfer `FAUCET_ALLOCATION`,
-      default 200000 TANI).
+- [ ] Faucet terisi TNC (deploy script mentransfer `FAUCET_ALLOCATION`,
+      default 200000 TNC).
 - [ ] Tiga wallet di Monad Testnet (chainId 10143): petani, investor A,
       investor B; masing-masing memiliki MON untuk gas.
 - [ ] Frontend di-restart setelah perubahan env (`cd apps/web && npm run dev`).
@@ -19,7 +19,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 | # | Scene | Durasi |
 |---|---|---|
-| 1 | Klaim TANI di `/faucet` | 15s |
+| 1 | Klaim TNC di `/faucet` | 15s |
 | 2 | Buat campaign di `/campaigns/new` | 20s |
 | 3 | Kontribusi dari dua wallet hingga target → Aktif | 25s |
 | 4 | Upload bukti + ajukan pencairan di `/dashboard` | 25s |
@@ -30,20 +30,20 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 | 9 | Feed audit di `/audit` | 15s |
 | 10 | (Opsional) Jalur refund pada campaign kedua yang gagal | 30s |
 
-### Scene 1 — `/faucet` klaim TANI (15s)
+### Scene 1 — `/faucet` klaim TNC (15s)
 
 - URL: `http://localhost:3000/faucet`
 - Aksi: hubungkan wallet petani, investor A, investor B secara bergantian;
   tekan "Klaim".
 - Hasil on-chain: `claim` pada `TANIFaucet`; event `Claimed`;
-  saldo TANI bertambah; satu klaim per alamat.
-- Katakan: "TANI adalah token simulasi testnet; setiap wallet klaim satu kali;
+  saldo TNC bertambah; satu klaim per alamat.
+- Katakan: "TNC adalah token simulasi testnet; setiap wallet klaim satu kali;
   gas dibayar dalam MON."
 
 ### Scene 2 — `/campaigns/new` buat campaign (20s)
 
 - URL: `http://localhost:3000/campaigns/new`
-- Aksi: isi judul, jenis tanaman, lokasi, target TANI kecil (cukup 2
+- Aksi: isi judul, jenis tanaman, lokasi, target TNC kecil (cukup 2
   kontribusi), deadline di masa depan, rencana dana; kirim `createCampaign`.
 - Hasil on-chain: `CampaignCreated(campaignId, farmer, title, targetAmount,
   fundingDeadline)`; status `FUNDING`.
@@ -53,7 +53,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 ### Scene 3 — kontribusi hingga target → Aktif (25s)
 
 - URL: `http://localhost:3000/campaigns/[campaignId]`
-- Aksi: investor A dan B menyetujui allowance TANI ke `TaniTraceFunding`, lalu
+- Aksi: investor A dan B menyetujui allowance TNC ke `TaniTraceFunding`, lalu
   `contribute` dari masing-masing hingga `totalRaised == targetAmount`.
 - Hasil on-chain: `ContributionMade` per kontributor; saat target tercapai
   `CampaignActivated(campaignId, totalRaised, activatedAt)`; status `ACTIVE`;
@@ -104,7 +104,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 - URL: halaman request atau detail campaign.
 - Aksi: petani memanggil `payDisbursement(requestId)`.
 - Hasil on-chain: `DisbursementPaid(requestId, campaignId, farmer, amount)`;
-  status `PAID`; `releasedTotal` bertambah; transfer TANI satu kali ke petani.
+  status `PAID`; `releasedTotal` bertambah; transfer TNC satu kali ke petani.
 - Katakan: "Pencairan satu kali; nominal persis yang disetujui."
 
 ### Scene 8 — `/dashboard` close cycle → Selesai (15s)
@@ -143,7 +143,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 - Contract belum diaudit.
 - Contract tidak menjamin keaslian bukti atau penggunaan dana; IPFS hanya
   membuktikan kecocokan konten terhadap referensi.
-- TANI tidak memiliki nilai uang.
+- TNC tidak memiliki nilai uang.
 - AI hanya memberi laporan advisory; hasilnya dapat salah, tidak disimpan
   on-chain, dan tidak boleh diklaim sebagai verifikasi keaslian. Tanpa
   `GEMINI_API_KEY`, kartu advisory tidak muncul dan alur tetap berjalan.

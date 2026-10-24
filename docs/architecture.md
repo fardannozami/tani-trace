@@ -7,7 +7,7 @@ manifest; Next.js hanya membaca state/event dan menjadi adapter upload.
 
 | Komponen | Lokasi | Peran |
 |---|---|---|
-| `TANIToken` | `contracts/src/TANIToken.sol` | ERC-20 "TANI", supply tetap 1.000.000e18, tanpa mint publik, tanpa owner |
+| `TANIToken` | `contracts/src/TANIToken.sol` | ERC-20 "TNC", supply tetap 1.000.000e18, tanpa mint publik, tanpa owner |
 | `TANIFaucet` | `contracts/src/TANIFaucet.sol` | Saldo pra-isi, satu klaim per alamat, `claimAmount` immutable |
 | `TaniTraceFunding` | `contracts/src/TaniTraceFunding.sol` | Campaign, kontribusi, voting, pencairan, refund, paginasi |
 | Frontend | `apps/web/` | Next.js + wagmi/viem; reads dari RPC; writes via `useContractTx` |
@@ -19,7 +19,7 @@ manifest; Next.js hanya membaca state/event dan menjadi adapter upload.
 ## Alur data
 
 1. Petani membuat campaign (`createCampaign`) → status `FUNDING`.
-2. Investor menyetor TANI (`contribute`) sebelum deadline dan sebelum target;
+2. Investor menyetor TNC (`contribute`) sebelum deadline dan sebelum target;
    saat target tercapai → `ACTIVE` dan kontribusi ditutup.
 3. Jika deadline lewat di bawah target → `FAILED` (via `finalizeCampaign` atau
    lazy transition di `claimRefund`).

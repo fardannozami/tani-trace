@@ -10,3 +10,5 @@ contracts/deployments/
 contracts/.env
 apps/web/.env.local
 .DS_Store
+*.tsbuildinfo
+apps/web/tsconfig.tsbuildinfo

@@ -106,8 +106,8 @@ Set `NEXT_PUBLIC_TOKEN_ADDRESS`, `NEXT_PUBLIC_FUNDING_ADDRESS`,
 
 ## 4. Isi faucet (opsional, jika allocation tidak otomatis)
 
-Deploy script sudah mentransfer `FAUCET_ALLOCATION` (default 200000 TANI) ke
-faucet. Jika faucet kosong, transfer TANI manual:
+Deploy script sudah mentransfer `FAUCET_ALLOCATION` (default 200000 TNC) ke
+faucet. Jika faucet kosong, transfer TNC manual:
 
 ```bash
 cast send $NEXT_PUBLIC_TOKEN_ADDRESS "transfer(address,uint256)" \
@@ -128,11 +128,11 @@ Buka `http://localhost:3000`, hubungkan wallet, pindahkan ke Monad Testnet
 ## 6. Runbook demo end-to-end
 
 1. Deploy contract (bagian 3) dan konfigurasi frontend.
-2. Petani dan 2-3 investor mengklaim TANI dari `/faucet`.
+2. Petani dan 2-3 investor mengklaim TNC dari `/faucet`.
 3. Petani membuka `/campaigns/new`, mengisi judul, jenis tanaman, lokasi,
-   target TANI, deadline, rencana dana, lalu membuat campaign (status
+   target TNC, deadline, rencana dana, lalu membuat campaign (status
    `FUNDING`).
-4. Setiap investor menyetujui allowance TANI ke `TaniTraceFunding`, lalu
+4. Setiap investor menyetujui allowance TNC ke `TaniTraceFunding`, lalu
    berkontribusi dari `/campaigns/[campaignId]` hingga target tercapai.
    Saat target tercapai, campaign otomatis menjadi `ACTIVE`.
 5. (Opsional negatif) Buat campaign kedua dengan target tidak tercapai hingga
@@ -201,7 +201,7 @@ waktu pembuatan), bukan hash byte JSON yang dicatat on-chain.
   terakhir).
 - **Env berubah tidak berefek**: env dibaca saat startup; hentikan dev server
   lalu jalankan ulang.
-- **Transaksi revert**: periksa status campaign/pengajuan, allowance TANI,
+- **Transaksi revert**: periksa status campaign/pengajuan, allowance TNC,
   dan saldo escrow; jangan retry otomatis.
 - **Manifest tidak cocok**: pastikan field (campaignId, requestId, farmer,
   amount, purpose, evidenceCid, requestedAt) identik dengan yang on-chain.
