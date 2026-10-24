@@ -54,6 +54,26 @@ on-chain dan tidak pernah memblokir transaksi.
 > production sudah live di **[tanitrace.web.id](https://www.tanitrace.web.id/)**.
 > Semua test dan build lulus.
 
+## 🖥️ Tampilan aplikasi
+
+TaniTrace memiliki tiga area utama untuk menjelaskan alur pendanaan dari awal
+hingga pencairan:
+
+1. **Landing page** — memperkenalkan pendanaan tani yang transparan, metrik
+   campaign aktif, dan tombol untuk menjelajahi atau membuat campaign.
+2. **Campaign** (`/campaigns`) — menampilkan daftar campaign pertanian dalam
+   bentuk kartu, lengkap dengan kategori, status, lokasi, progres dana, target,
+   pemilik campaign, dan batas waktu. Filter tersedia untuk semua,
+   pendanaan, aktif, gagal, dan selesai.
+3. **Dashboard** (`/dashboard`) — ruang kerja petani untuk memilih campaign,
+   mengunggah bukti ke IPFS, mengisi nominal serta tujuan pencairan, lalu
+   mengajukan pencairan. Investor kemudian meninjau pengajuan dan memberikan
+   suara melalui alur voting on-chain.
+
+Navigasi utama juga menyediakan halaman **Voting**, **Audit**, dan **Faucet**.
+Wallet yang terhubung ditampilkan di header, sementara seluruh status penting
+dan keputusan akhir tetap bersumber dari smart contract Monad.
+
 | | |
 | --- | --- |
 | 🌐 **Aplikasi** | [www.tanitrace.web.id](https://www.tanitrace.web.id/) · [jalankan lokal](#-menjalankan-di-lokal-langkah-demi-langkah) |
