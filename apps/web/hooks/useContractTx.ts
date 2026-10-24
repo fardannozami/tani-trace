@@ -21,6 +21,34 @@ const ERROR_MESSAGES: Record<string, string> = {
   EscrowShortfall: "Dana escrow tidak mencukupi.",
 };
 
+function collectErrorText(err: unknown): string {
+  const parts: string[] = [];
+  let current: unknown = err;
+  let depth = 0;
+
+  while (current && depth < 4) {
+    if (typeof current === "string") {
+      parts.push(current);
+      break;
+    }
+    if (current instanceof Error) {
+      parts.push(current.message);
+      current = (current as Error & { cause?: unknown }).cause;
+      depth += 1;
+      continue;
+    }
+    if (typeof current !== "object") break;
+    const value = current as Record<string, unknown>;
+    for (const key of ["message", "shortMessage", "details", "reason"]) {
+      if (typeof value[key] === "string") parts.push(value[key] as string);
+    }
+    current = value.cause;
+    depth += 1;
+  }
+
+  return parts.join(" ");
+}
+
 export function explainContractRevert(err: unknown): string {
   try {
     const e = err as { data?: `0x${string}`; cause?: { data?: `0x${string}` } };
@@ -34,10 +62,20 @@ export function explainContractRevert(err: unknown): string {
   } catch {
     // ignore
   }
-  const msg = err instanceof Error ? err.message : String(err);
-  if (msg.includes("User rejected") || msg.includes("user rejected")) return "Transaksi dibatalkan pengguna.";
-  if (msg.includes("wrong-network")) return "Jaringan bukan Monad Testnet.";
-  return msg;
+  const msg = collectErrorText(err);
+  const normalized = msg.toLowerCase();
+  if (normalized.includes("user rejected") || normalized.includes("user denied")) return "Transaksi dibatalkan dari wallet.";
+  if (normalized.includes("wrong-network") || normalized.includes("chain mismatch")) return "Wallet belum berada di Monad Testnet.";
+  if (normalized.includes("rate limit") || normalized.includes("too many requests") || normalized.includes("429")) {
+    return "Jaringan sedang sibuk. Tunggu beberapa detik, lalu coba lagi.";
+  }
+  if (normalized.includes("internal error") || normalized.includes("failed to fetch") || normalized.includes("rpc")) {
+    return "Koneksi ke jaringan sedang mengalami gangguan. Tunggu sebentar, lalu coba lagi.";
+  }
+  if (normalized.includes("insufficient funds") || normalized.includes("insufficient balance")) {
+    return "Saldo MON tidak cukup untuk biaya transaksi. Isi MON testnet, lalu coba lagi.";
+  }
+  return msg || "Transaksi gagal. Periksa wallet dan jaringan, lalu coba lagi.";
 }
 
 export function useContractTx() {
