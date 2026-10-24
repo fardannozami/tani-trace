@@ -1,7 +1,7 @@
 # TaniTrace --- Dokumen Kebutuhan Produk (PRD)
 
 **Versi:** 2.0\
-**Status:** Spesifikasi MVP hackathon --- diselaraskan dengan implementasi repo\
+**Status:** Spesifikasi MVP hackathon\
 **Jaringan:** Monad Testnet (chainId 10143)\
 **Jenis produk:** Protokol pendanaan pertanian on-chain\
 **Tagline:** *Pendanaan pertanian transparan, pencairan disetujui
