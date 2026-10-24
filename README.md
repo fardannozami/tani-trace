@@ -7,8 +7,8 @@
 <p>
 <a href="https://github.com/fardannozami/tani-trace"><img src="https://img.shields.io/badge/repo-GitHub-0b1d15?style=for-the-badge&logo=github" alt="Repo GitHub"></a>
 <a href="https://docs.monad.xyz/developer-essentials/testnet"><img src="https://img.shields.io/badge/Monad-Testnet%20%C2%B7%2010143-836EF9?style=for-the-badge" alt="Monad Testnet"></a>
-<img src="https://img.shields.io/badge/Foundry-105%20test-1B1B1B?style=for-the-badge" alt="105 Foundry tests">
-<img src="https://img.shields.io/badge/Frontend-51%20test-2c6a48?style=for-the-badge" alt="51 frontend tests">
+<img src="https://img.shields.io/badge/Foundry-106%20test-1B1B1B?style=for-the-badge" alt="106 Foundry tests">
+<img src="https://img.shields.io/badge/Frontend-52%20test-2c6a48?style=for-the-badge" alt="52 frontend tests">
 </p>
 
 <p>
@@ -51,15 +51,15 @@ on-chain dan tidak pernah memblokir transaksi.
 > **Status:** kontrak **sudah live di Monad Testnet** (alamat di
 > [bawah](#alamat-kontrak), tercatat di
 > [`deployments/monadTestnet.json`](deployments/monadTestnet.json)). Frontend
-> belum di-hosting — jalankan lokal lalu isi alamat kontrak ke `.env.local`.
+> production sudah live di **[tanitrace.web.id](https://www.tanitrace.web.id/)**.
 > Semua test dan build lulus.
 
 | | |
 | --- | --- |
-| 🌐 **Aplikasi** | Jalankan lokal: `http://localhost:3000` (lihat [panduan](#-menjalankan-di-lokal-langkah-demi-langkah)) |
+| 🌐 **Aplikasi** | [www.tanitrace.web.id](https://www.tanitrace.web.id/) · [jalankan lokal](#-menjalankan-di-lokal-langkah-demi-langkah) |
 | 🔗 **Deploy** | Monad Testnet, blok `73725698` · [deployments/monadTestnet.json](deployments/monadTestnet.json) |
 | 📜 **Kontrak** | `contracts/src/` — `TANIToken`, `TANIFaucet`, `TaniTraceFunding` |
-| ✅ **Hasil uji** | `forge test` **105 lulus** · Vitest **51 lulus** · `tsc`, ESLint, `next build` lulus |
+| ✅ **Hasil uji** | `forge test` **106 lulus** · Vitest **52 lulus** · `tsc`, ESLint, `next build` lulus |
 | ⛓️ **Jaringan** | Monad Testnet · chain ID `10143` · gas dibayar dalam **MON** |
 | 🪙 **Token** | TNC ("Tani Token"), 18 desimal, supply tetap 1.000.000, tanpa owner |
 | 🧾 **Testnet saja** | TNC tidak punya nilai uang dan tidak bisa ditukar |
@@ -84,9 +84,10 @@ frontend recomputes the manifest hash and compares it with the on-chain value. A
 optional Gemini-based pre-check is advisory only: it is stored inside the IPFS
 manifest, excluded from the hash, and never blocks uploads, transactions, or
 on-chain logic. There is no admin, no pause, no upgrade path, and no permanent
-backend or database. Tests: 105 Foundry (unit, fuzz, invariant) and 51 frontend
+backend or database. Tests: 106 Foundry (unit, fuzz, invariant) and 52 frontend
 (Vitest). The contracts are deployed on Monad Testnet (see
-`deployments/monadTestnet.json`); the frontend is not hosted yet and runs locally.
+`deployments/monadTestnet.json`); the production frontend is live at
+`https://www.tanitrace.web.id/`.
 </details>
 
 ## 🚀 Coba sekarang
@@ -94,10 +95,9 @@ backend or database. Tests: 105 Foundry (unit, fuzz, invariant) and 51 frontend
 Yang perlu disiapkan: browser + wallet (MetaMask atau wallet EIP-1193 lain) dan
 sedikit **MON testnet** untuk gas. Tidak perlu uang sungguhan.
 
-> **Penting:** kontraknya sudah dideploy, tetapi frontend belum di-hosting. Jadi
-> caranya: jalankan frontend di laptop (5–10 menit), lalu isi alamat kontrak dari
-> [`deployments/monadTestnet.json`](deployments/monadTestnet.json) ke
-> `apps/web/.env.local`. Panduan: [Menjalankan di lokal](#-menjalankan-di-lokal-langkah-demi-langkah).
+> **Demo publik:** buka [www.tanitrace.web.id](https://www.tanitrace.web.id/),
+> hubungkan wallet, lalu pastikan wallet berada di Monad Testnet. Untuk
+> development atau deployment ulang, ikuti panduan lokal di bawah.
 
 ### Langkah mencoba
 
@@ -118,7 +118,7 @@ sedikit **MON testnet** untuk gas. Tidak perlu uang sungguhan.
    lihat [dokumentasi faucet](https://docs.monad.xyz/developer-essentials/faucet)).
    **Deploy butuh sekitar 1–2 MON** (3 kontrak, ~5,3 juta gas); satu transaksi
    biasa sesudahnya hanya ~0,01 MON.
-4. **Buka aplikasi** `http://localhost:3000` (atau URL demo yang diberikan),
+4. **Buka aplikasi** [www.tanitrace.web.id](https://www.tanitrace.web.id/),
    klik **Hubungkan wallet**, lalu setujui perpindahan jaringan ke Monad Testnet.
    Aplikasi menolak transaksi jika wallet berada di chain lain.
 5. **Klaim TNC** di `/faucet` (100 TNC per alamat, sekali).
@@ -512,7 +512,7 @@ petunjuk konfigurasi, bukan error.
 cd apps/web
 bun run typecheck     # tsc --noEmit
 bun run lint          # ESLint 9
-bun run test          # Vitest (51 test)
+bun run test          # Vitest (52 test)
 bun run build         # production build
 bash scripts/sync-abi.sh   # segarkan ABI frontend dari contracts/out
 ```
@@ -567,12 +567,12 @@ diverifikasi ulang**, karena diunggah oleh pemohon.
 ## 🧪 Test
 
 ```bash
-cd contracts && forge build && forge test    # 105 test Foundry
-cd apps/web && bun run test                  # 51 test Vitest
+cd contracts && forge build && forge test    # 106 test Foundry
+cd apps/web && bun run test                  # 52 test Vitest
 cd apps/web && bun run typecheck && bun run lint && bun run build
 ```
 
-Foundry (105) mencakup: pendanaan sukses/aktivasi, deadline habis + refund, akses
+Foundry (106) mencakup: pendanaan sukses/aktivasi, deadline habis + refund, akses
 tanpa hak, nominal tidak valid dan escrow kurang, kontribusi melebihi sisa target,
 fee-on-transfer, voting non-investor dan dobel, kuorum dengan pembulatan ke atas,
 mayoritas YES/NO/seri, finalisasi sebelum deadline, pencairan dobel, refund dobel,
@@ -580,7 +580,7 @@ refund campaign sukses, pengajuan pada campaign gagal/selesai, penutupan campaig
 dengan kewajiban tersisa, reentrancy dan kegagalan transfer, emisi event, invariant
 escrow, serta paginasi.
 
-Frontend (51) mencakup: paritas `computeManifestHash` dengan kontrak (diverifikasi
+Frontend (52) mencakup: paritas `computeManifestHash` dengan kontrak (diverifikasi
 silang Solidity ↔ viem), invarians hash ketika `advisory` ada/tidak ada,
 serialisasi manifest, validasi MIME/ukuran, format angka/tanggal/alamat, decoder
 array posisional viem (`campaigns`/`requests`), helper
@@ -590,13 +590,13 @@ advisory.
 ## 🗂️ Struktur repo
 
 ```text
-contracts/   Foundry: src/ (3 kontrak), test/ (105 test), script/ (Deploy, setup.sh)
+contracts/   Foundry: src/ (3 kontrak), test/ (106 test), script/ (Deploy, setup.sh)
 apps/web/    Next.js App Router
   app/        9 halaman + 4 route API (upload, nonce, manifest, advisory)
   components/ UI campaign & ui
   hooks/      useContractTx, useCampaign(s), useCampaignActions, useWallet, useTokenInfo, useIPFS, useAuditFeed, useNowSeconds
   lib/        ABI, alamat, manifest hash, tipe, format, event parser
-  test/       Vitest (51 test)
+  test/       Vitest (52 test)
 docs/        PRD, desain, arsitektur, build guide, demo script, tasks
 deployments/ hasil deploy (dibuat otomatis; belum ada sampai deploy dijalankan)
 ```
@@ -624,8 +624,8 @@ deployments/ hasil deploy (dibuat otomatis; belum ada sampai deploy dijalankan)
 
 ## 📝 Catatan jujur
 
-- **Sudah dideploy, tapi belum di-hosting.** Kontrak live di Monad Testnet;
-  frontend dijalankan lokal. Belum ada URL demo publik atau screenshot.
+- **Production:** frontend live di [www.tanitrace.web.id](https://www.tanitrace.web.id/);
+  kontrak berjalan di Monad Testnet.
 - **Source belum diverifikasi** di explorer (opsional, tidak memengaruhi alur).
 - **TNC adalah token simulasi** tanpa nilai uang; gas dibayar dalam MON testnet.
 - **Tidak ada resistensi Sybil.** Faucet satu klaim per alamat bukan perlindungan

@@ -1,6 +1,7 @@
 # Skrip Demo TaniTrace (2–3 Menit)
 
-Skrip runnable untuk demo v2 di Monad Testnet. Semua data sintetis; TNC adalah
+Skrip runnable untuk demo v2 di Monad Testnet. Demo publik tersedia di
+[www.tanitrace.web.id](https://www.tanitrace.web.id/). Semua data sintetis; TNC adalah
 token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ## 0. Checklist persiapan
@@ -12,7 +13,8 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
       default 200000 TNC).
 - [ ] Tiga wallet di Monad Testnet (chainId 10143): petani, investor A,
       investor B; masing-masing memiliki MON untuk gas.
-- [ ] Frontend di-restart setelah perubahan env (`cd apps/web && npm run dev`).
+- [ ] Untuk demo publik, buka `https://www.tanitrace.web.id/`. Untuk lokal,
+      restart frontend setelah perubahan env (`cd apps/web && npm run dev`).
 - [ ] Untuk time warp lokal: Foundry `cast` tersedia.
 
 ## 1. Urutan scene (total ~2,5 menit)
@@ -32,7 +34,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ### Scene 1 — `/faucet` klaim TNC (15s)
 
-- URL: `http://localhost:3000/faucet`
+- URL: `https://www.tanitrace.web.id/faucet`
 - Aksi: hubungkan wallet petani, investor A, investor B secara bergantian;
   tekan "Klaim".
 - Hasil on-chain: `claim` pada `TANIFaucet`; event `Claimed`;
@@ -42,7 +44,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ### Scene 2 — `/campaigns/new` buat campaign (20s)
 
-- URL: `http://localhost:3000/campaigns/new`
+- URL: `https://www.tanitrace.web.id/campaigns/new`
 - Aksi: isi judul, jenis tanaman, lokasi, target TNC kecil (cukup 2
   kontribusi), deadline di masa depan, rencana dana; kirim `createCampaign`.
 - Hasil on-chain: `CampaignCreated(campaignId, farmer, title, targetAmount,
@@ -52,7 +54,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ### Scene 3 — kontribusi hingga target → Aktif (25s)
 
-- URL: `http://localhost:3000/campaigns/[campaignId]`
+- URL: `https://www.tanitrace.web.id/campaigns/[campaignId]`
 - Aksi: investor A dan B menyetujui allowance TNC ke `TaniTraceFunding`, lalu
   `contribute` dari masing-masing hingga `totalRaised == targetAmount`.
 - Hasil on-chain: `ContributionMade` per kontributor; saat target tercapai
@@ -66,7 +68,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ### Scene 4 — `/dashboard` upload bukti + ajukan pencairan (25s)
 
-- URL: `http://localhost:3000/dashboard`
+- URL: `https://www.tanitrace.web.id/dashboard`
 - Aksi: pilih campaign aktif; unggah berkas (JPEG/PDF) ke IPFS (upload API);
   isi nominal, tujuan, CID bukti; kirim `requestDisbursement`.
 - Hasil on-chain: `DisbursementRequested(requestId, campaignId, farmer, amount,
@@ -80,7 +82,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ### Scene 5 — request page: manifest hash + voting YES (25s)
 
-- URL: `http://localhost:3000/campaigns/[campaignId]/requests/[requestId]`
+- URL: `https://www.tanitrace.web.id/campaigns/[campaignId]/requests/[requestId]`
 - Aksi: tampilkan `manifestHash` on-chain dan verifikasi bundel IPFS; investor A
   dan B memilih YES (`vote(requestId, true)`).
 - Hasil on-chain: `VoteCast(requestId, campaignId, voter, true, weight)` per
@@ -109,7 +111,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ### Scene 8 — `/dashboard` close cycle → Selesai (15s)
 
-- URL: `http://localhost:3000/dashboard`
+- URL: `https://www.tanitrace.web.id/dashboard`
 - Aksi: petani memanggil `completeCampaign(campaignId)` (hanya jika tidak ada
   pengajuan aktif maupun approved yang belum dibayar).
 - Hasil on-chain: `CampaignCompleted(campaignId, farmer, releasedTotal)`; status
@@ -118,7 +120,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 
 ### Scene 9 — `/audit` feed event (15s)
 
-- URL: `http://localhost:3000/audit`
+- URL: `https://www.tanitrace.web.id/audit`
 - Aksi: buka feed audit; filter kelompok event.
 - Hasil: daftar event on-chain (`CampaignCreated`, `ContributionMade`,
   `CampaignActivated`, `DisbursementRequested`, `VoteCast`,

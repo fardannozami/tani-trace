@@ -117,13 +117,18 @@ cast send $NEXT_PUBLIC_TOKEN_ADDRESS "transfer(address,uint256)" \
 
 ## 5. Jalankan frontend
 
+Deployment production tersedia di [www.tanitrace.web.id](https://www.tanitrace.web.id/).
+Gunakan URL tersebut untuk demo publik; langkah berikut dipakai untuk development
+lokal.
+
 ```bash
 cd apps/web
 bun run dev
 ```
 
-Buka `http://localhost:3000`, hubungkan wallet, pindahkan ke Monad Testnet
-(chain ID 10143).
+Buka `http://localhost:3000` untuk development lokal, atau
+[www.tanitrace.web.id](https://www.tanitrace.web.id/) untuk deployment production.
+Hubungkan wallet dan pindahkan ke Monad Testnet (chain ID 10143).
 
 ## 6. Runbook demo end-to-end
 
