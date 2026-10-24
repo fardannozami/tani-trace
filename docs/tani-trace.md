@@ -10,7 +10,7 @@ investor secara on-chain.*
 > Dokumen ini adalah spesifikasi v2.0 yang sudah diselaraskan dengan aplikasi
 > yang berjalan di repo ini. Penyesuaian terhadap draf awal bersifat klarifikasi
 > teknis (field pengajuan, batas string, alur upload, advisory AI, route, dan
-> environment) dan tidak mengubah aturan ekonomi inti: voting 24 jam, kuorum
+> environment) dan tidak mengubah aturan ekonomi inti: voting 40 detik pada mode demo, kuorum
 > 50%, satu pengajuan aktif per campaign, dan pencairan satu kali.
 
 ## 1. Ringkasan Produk
@@ -148,7 +148,7 @@ harus di masa depan.
 4.  Nominal harus lebih besar dari nol dan tidak melebihi
     `availableEscrow = totalRaised - releasedTotal`.
 5.  Contract menghitung `manifestHash` secara kanonis dari field
-    pengajuan dan `requestedAt` (waktu blok), membuka voting 24 jam, dan
+    pengajuan dan `requestedAt` (waktu blok), membuka voting 40 detik pada mode demo, dan
     menetapkan status `PENDING`.
 
 ### 6.4 Voting dan Finalisasi
@@ -272,7 +272,7 @@ status akhir.
 ## 8. Aturan Pendanaan dan Voting
 
 -   Unit nominal adalah TNC dengan 18 decimals.
--   Durasi voting: 24 jam (`VOTING_PERIOD`).
+-   Durasi voting: 40 detik pada deployment demo (`VOTING_PERIOD`).
 -   Kuorum: 50% dari `totalRaised`, dibulatkan ke atas
     (`QUORUM_BPS = 5000`, `BPS_DENOMINATOR = 10000`).
 -   Persetujuan: bobot YES harus lebih besar daripada bobot NO.
@@ -337,7 +337,7 @@ Konstanta dan batas:
 
 | Konstanta | Nilai |
 |---|---|
-| `VOTING_PERIOD` | 24 jam |
+| `VOTING_PERIOD` | 40 detik (demo) |
 | `QUORUM_BPS` / `BPS_DENOMINATOR` | 5000 / 10000 |
 | `MAX_TITLE_LENGTH` | 96 |
 | `MAX_CROP_TYPE_LENGTH` | 48 |
@@ -564,7 +564,7 @@ relevan diberi index agar feed audit dapat difilter.
 -   Setiap alamat hanya dapat voting sekali per pengajuan.
 -   Bobot suara sama dengan kontribusi campaign yang tercatat, bukan
     saldo wallet saat ini.
--   Voting ditutup setelah 24 jam.
+-   Voting ditutup setelah 40 detik pada deployment demo.
 -   Aturan kuorum dan YES/NO diterapkan secara tepat, termasuk
     pembulatan kuorum ke atas dan hasil seri.
 -   Pengajuan tanpa kuorum menjadi `EXPIRED`; voting yang tidak

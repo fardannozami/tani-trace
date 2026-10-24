@@ -11,7 +11,9 @@ contract TaniTraceFunding is ReentrancyGuard {
     enum CampaignStatus { FUNDING, ACTIVE, FAILED, COMPLETED }
     enum RequestStatus { PENDING, APPROVED, REJECTED, EXPIRED, PAID }
 
-    uint256 public constant VOTING_PERIOD = 1 days;
+    // Demo mode: short voting window so a live judging demo can finalize on-chain.
+    // Use a longer governance window before production deployment.
+    uint256 public constant VOTING_PERIOD = 40 seconds;
     // Approved requests must be paid within this window or they can be
     // released by anyone, allowing the farmer to submit a new request.
     uint256 public constant PAYMENT_PERIOD = 7 days;

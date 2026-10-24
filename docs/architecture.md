@@ -24,7 +24,7 @@ manifest; Next.js hanya membaca state/event dan menjadi adapter upload.
 3. Jika deadline lewat di bawah target → `FAILED` (via `finalizeCampaign` atau
    lazy transition di `claimRefund`).
 4. Petani mengajukan pencairan (`requestDisbursement`) saat `ACTIVE` →
-   `PENDING`, voting 24 jam, `manifestHash` dihitung on-chain.
+   `PENDING`, voting 40 detik pada deployment demo, `manifestHash` dihitung on-chain.
 5. Kontributor memilih `vote` (bobot = kontribusi tercatat).
 6. Siapa pun memfinalisasi setelah deadline (`finalizeRequest`) →
    `APPROVED`/`REJECTED`/`EXPIRED` (kuorum dengan ceiling division: 50%

@@ -26,7 +26,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 | 3 | Kontribusi dari dua wallet hingga target → Aktif | 25s |
 | 4 | Upload bukti + ajukan pencairan di `/dashboard` | 25s |
 | 5 | Manifest hash + voting YES di request page | 25s |
-| 6 | Time warp 24 jam + finalisasi → Approved | 20s |
+| 6 | Tunggu 40 detik + finalisasi → Approved | 20s |
 | 7 | Pay disbursement → Paid | 15s |
 | 8 | Close cycle → Selesai di `/dashboard` | 15s |
 | 9 | Feed audit di `/audit` | 15s |
@@ -90,7 +90,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 - Katakan: "Bobot suara sama dengan kontribusi tercatat; hash manifest dapat
   diverifikasi ulang di frontend."
 
-### Scene 6 — time warp 24 jam + finalisasi → Approved (20s)
+### Scene 6 — tunggu 40 detik + finalisasi → Approved (20s)
 
 - URL: halaman request yang sama (atau terminal untuk time warp).
 - Aksi lokal: `cast rpc evm_increaseTime 86401` lalu `cast rpc evm_mine`;
@@ -98,7 +98,7 @@ token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
 - Hasil on-chain: `RequestFinalized(requestId, campaignId, APPROVED,
   yesWeight, noWeight)` (bila kuorum tercapai dan YES > NO); status
   `APPROVED`; `approvedRequestId` terisi.
-- Katakan: "Finalisasi permissionless setelah 24 jam; kuorum dan mayoritas
+- Katakan: "Setelah 40 detik, finalisasi permissionless; kuorum dan mayoritas
   ditegakkan contract."
 
 ### Scene 7 — pay disbursement → Paid (15s)

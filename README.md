@@ -40,7 +40,7 @@ TaniTrace adalah protokol pendanaan pertanian di **Monad Testnet**. Petani membu
 campaign dengan target dan tenggat; investor menyetor token simulasi **TNC**;
 dana dikunci di smart contract (escrow). Saat petani butuh dana untuk benih,
 pupuk, atau tenaga kerja, ia mengajukan pencairan. **Investor campaign itulah yang
-memutuskan** lewat voting 24 jam — bukan admin. Jika disetujui, contract
+memutuskan** lewat voting 40 detik untuk mode demo — bukan admin. Jika disetujui, contract
 mentransfer dana tepat sebesar nominal yang disetujui, satu kali.
 
 Foto dan nota bukti disimpan di **IPFS**; hash manifest-nya dicatat on-chain
@@ -74,7 +74,7 @@ TaniTrace is a transparent agricultural funding protocol on Monad Testnet
 Investors fund it with a simulated ERC-20 token, **TNC**, held in the funding
 contract escrow. When the farmer needs money during the growing season, they
 submit a disbursement request (amount, purpose, IPFS evidence CID). The contract
-records a canonical `manifestHash`, opens a 24-hour vote, and only contributing
+records a canonical `manifestHash`, opens a 40-second demo vote, and only contributing
 investors may vote, weighted by their recorded contribution (not their current
 wallet balance). A request passes only if quorum — 50% of `totalRaised`, rounded
 up — is met and YES weight exceeds NO. Anyone can finalize after the deadline
@@ -132,15 +132,16 @@ sedikit **MON testnet** untuk gas. Tidak perlu uang sungguhan.
    | Petani | `/campaigns/new` | buat campaign (target + deadline) |
    | Petani | `/dashboard` | unggah bukti ke IPFS, ajukan pencairan |
    | Investor | `/campaigns/[id]/requests/[requestId]` | cek hash manifest, vote YES/NO |
-   | Siapa pun | halaman request | `finalizeRequest` setelah 24 jam |
+   | Siapa pun | halaman request | `finalizeRequest` setelah 40 detik |
    | Petani | halaman request | `payDisbursement` jika `APPROVED` |
    | Petani | `/dashboard` | `completeCampaign` setelah kewajiban selesai |
    | Semua | `/audit` | lihat seluruh event on-chain + tautan explorer |
    | Kontributor | `/refund` | refund jika campaign `FAILED` |
 
-7. **Voting 24 jam terasa lama saat demo.** Untuk demo, jalankan chain lokal
-   (Anvil) dan majukan waktu: `cast rpc evm_increaseTime 86401` lalu
-   `cast rpc evm_mine`.
+7. **Voting demo berlangsung 40 detik.** Setelah deadline lewat, siapa pun dapat
+   memanggil `finalizeRequest`: suara YES lebih besar dan kuorum tercapai menjadi
+   `APPROVED`, mayoritas NO menjadi `REJECTED`, dan suara di bawah kuorum menjadi
+   `EXPIRED`. Voting tidak bisa menerima suara baru setelah deadline.
 
 ## 🌾 Masalah & solusi
 
@@ -154,7 +155,8 @@ TaniTrace memindahkan aturan itu ke smart contract:
 - **Escrow, bukan titipan pribadi.** Dana kontribusi terkunci di contract.
   Tidak ada admin yang bisa menariknya; sisa escrow yang tidak pernah diajukan
   tetap di contract dan tidak bisa diambil sepihak.
-- **Pencairan harus disetujui investor.** Setiap pengajuan membuka voting 24 jam.
+- **Pencairan harus disetujui investor.** Setiap pengajuan membuka voting 40 detik
+  pada deployment demo ini; gunakan durasi lebih panjang sebelum produksi.
   Bobot suara = kontribusi tercatat (bukan saldo wallet saat ini), satu alamat
   satu suara per pengajuan. Kuorum 50% dibulatkan ke atas; YES harus lebih besar
   dari NO.
@@ -180,7 +182,7 @@ Contoh angka (satuan TNC, sama seperti di test):
 | --- | --- |
 | Target campaign | 1.000 TNC |
 | Investor A / B | 600 / 400 TNC (bobot suara sama dengan kontribusi) |
-| Pengajuan benih | 300 TNC → `PENDING` (voting 24 jam) |
+| Pengajuan benih | 300 TNC → `PENDING` (voting 40 detik pada mode demo) |
 | Suara | A YES 600, B NO 400 → kuorum 500 tercapai, YES > NO → `APPROVED` |
 | Pencairan | petani menerima tepat 300 TNC; `releasedTotal` = 300 |
 | Escrow tersisa | 700 TNC (bisa diajukan lagi atau tetap di contract) |
@@ -250,7 +252,7 @@ flowchart LR
    difinalisasi: target tercapai → `ACTIVE`, target tidak tercapai → `FAILED`
    (kontributor bisa `claimRefund`).
 4. Petani upload bukti ke IPFS → `requestDisbursement` → status `PENDING`,
-   voting 24 jam, `manifestHash` dihitung on-chain.
+   voting 40 detik pada mode demo, `manifestHash` dihitung on-chain.
 5. Investor `vote(requestId, support)`; bobot = kontribusi tercatat.
 6. Siapa pun `finalizeRequest` setelah deadline →
    `APPROVED` / `REJECTED` / `EXPIRED`.
@@ -266,7 +268,7 @@ Semua kontrak ada di [`contracts/src/`](contracts/src).
 | --- | --- |
 | `TANIToken` | ERC-20 "Tani Token" simbol **TNC**, 18 desimal, supply tetap 1.000.000, dicetak sekali ke deployer, tanpa mint publik/owner/admin/pause |
 | `TANIFaucet` | Saldo TNC pra-isi, satu klaim per alamat, `claimAmount` immutable (default 100 TNC) |
-| `TaniTraceFunding` | Campaign, kontribusi ERC-20, pengajuan, voting 24 jam, finalisasi permissionless, pencairan satu kali, refund, penutupan campaign, view ber-paginasi |
+| `TaniTraceFunding` | Campaign, kontribusi ERC-20, pengajuan, voting 40 detik pada mode demo, finalisasi permissionless, pencairan satu kali, refund, penutupan campaign, view ber-paginasi |
 
 Fungsi tulis: `createCampaign`, `contribute`, `finalizeCampaign`,
 `requestDisbursement`, `vote`, `finalizeRequest`, `payDisbursement`,
@@ -278,7 +280,7 @@ Fungsi baca: `getCampaign`, `getRequest`, `getVote`, `availableEscrow`,
 
 | Konstanta | Nilai |
 | --- | --- |
-| `VOTING_PERIOD` | 24 jam |
+| `VOTING_PERIOD` | 40 detik (demo) |
 | `QUORUM_BPS` / `BPS_DENOMINATOR` | 5.000 / 10.000 (50%) |
 | `MAX_TITLE_LENGTH` | 96 |
 | `MAX_CROP_TYPE_LENGTH` | 48 |
@@ -339,9 +341,10 @@ NEXT_PUBLIC_FAUCET_ADDRESS=0x647d112774F76a2ceC6C409ce823158D8d2a4Aba
 NEXT_PUBLIC_DEPLOY_BLOCK=73746544
 ```
 
-Source code deployment terbaru sudah terverifikasi via Sourcify Monad. Jika
-Anda mendeploy ulang, jalankan kembali perintah verifikasi di bawah dan
-ganti semua nilai di atas dengan hasil `deployments/monadTestnet.json` yang baru.
+Deployment yang tercantum di atas adalah deployment terverifikasi sebelumnya.
+Karena mode demo sekarang memakai voting 40 detik, deploy ulang kontrak Funding
+dan verifikasi ulang source sebelum demo berikutnya; alamat baru harus diambil
+dari `deployments/monadTestnet.json` dan dipakai untuk env frontend.
 
 ## 💻 Menjalankan di lokal (langkah demi langkah)
 
@@ -543,7 +546,7 @@ Durasi ±2–3 menit. Detail per adegan: [`docs/demo-script.md`](docs/demo-scrip
 | 3 | Dua investor kontribusi sampai target | `/campaigns/[id]` | `ContributionMade` per investor, `CampaignActivated`, status `ACTIVE` |
 | 4 | Upload bukti + ajukan pencairan | `/dashboard` | berkas + manifest di IPFS; `DisbursementRequested`, `PENDING`, `manifestHash` |
 | 5 | Verifikasi hash + vote YES | halaman request | hash ✓ cocok; `VoteCast` dengan bobot kontribusi |
-| 6 | Time warp 24 jam + finalisasi | halaman request / terminal | `RequestFinalized` → `APPROVED` |
+| 6 | Tunggu 40 detik + finalisasi | halaman request / terminal | `RequestFinalized` → `APPROVED` |
 | 7 | Pencairan | halaman request | `DisbursementPaid`, status `PAID`, `releasedTotal` naik |
 | 8 | Tutup siklus | `/dashboard` | `CampaignCompleted`, status `COMPLETED` |
 | 9 | Audit | `/audit` | seluruh event dengan tautan explorer |

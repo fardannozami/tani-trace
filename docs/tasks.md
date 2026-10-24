@@ -15,8 +15,8 @@ Simbol token: **TNC** ("Tani Token", 18 desimal).
 - [x] `TANIFaucet` — saldo pra-isi, satu klaim per alamat, `claimAmount`
   immutable (default 100 TNC), `ReentrancyGuard` (`contracts/src/TANIFaucet.sol`).
 - [x] `TaniTraceFunding` — campaign, kontribusi ERC-20, transisi
-  FUNDING/ACTIVE/FAILED/COMPLETED, pengajuan pencairan, voting 24 jam
-  (`VOTING_PERIOD = 1 days`), finalisasi permissionless dengan kuorum ceiling
+  FUNDING/ACTIVE/FAILED/COMPLETED, pengajuan pencairan, voting 40 detik untuk
+  demo (`VOTING_PERIOD = 40 seconds`), finalisasi permissionless dengan kuorum ceiling
   division (`QUORUM_BPS = 5_000`), pencairan satu kali, refund satu kali,
   `completeCampaign` dengan guard kewajiban belum selesai
   (`pendingRequestId`/`approvedRequestId`), SafeERC20 + tolak fee-on-transfer,
@@ -109,7 +109,7 @@ cd apps/web && npx tsc --noEmit && bun run lint && bun run test && bun run build
   dan `next build` lulus.
 - [x] Kontrak ter-deploy di Monad Testnet + `deployments/monadTestnet.json`.
 - [x] Frontend production live di `https://www.tanitrace.web.id/`.
-- [x] Source contract deployment terbaru terverifikasi via Sourcify Monad.
+- [ ] Source contract deployment baru (voting 40 detik) diverifikasi via Sourcify Monad setelah redeploy.
 - [ ] Frontend terhubung wallet, membaca state, dan mengirim semua transaksi
   (env sudah terisi; tinggal uji manual E2E).
 - [ ] Upload + verifikasi hash manifest IPFS berjalan (`PINATA_JWT` sudah terisi;

@@ -329,10 +329,18 @@ contract TaniTraceFundingTest is Test {
         uint256 id = _activateCampaign();
         vm.prank(farmer);
         uint256 rid = funding.requestDisbursement(id, 10 ether, "purpose", "QmCid");
-        vm.warp(block.timestamp + 2 days);
+        vm.warp(block.timestamp + 41 seconds);
         vm.prank(alice);
         vm.expectRevert(TaniTraceFunding.InvalidStatus.selector);
         funding.vote(rid, true);
+    }
+
+    function test_votingDeadline_is40Seconds() public {
+        uint256 id = _activateCampaign();
+        vm.prank(farmer);
+        uint256 rid = funding.requestDisbursement(id, 10 ether, "purpose", "QmCid");
+        (, , , , , , uint64 requestedAt, uint64 votingDeadline, , , ) = funding.requests(rid);
+        assertEq(votingDeadline - requestedAt, 40 seconds);
     }
 
     function test_vote_nonPending_reverts() public {

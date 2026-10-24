@@ -147,7 +147,7 @@ Hubungkan wallet dan pindahkan ke Monad Testnet (chain ID 10143).
    langkah: (a) mengisi nominal + tujuan, memilih berkas bukti, dan menekan
    **Unggah bukti** (upload API mem-pin berkas + manifest JSON ke IPFS dan
    menampilkan CID), kemudian (b) menekan **Ajukan pencairan** untuk mengirim
-   `requestDisbursement` dengan CID tersebut (status `PENDING`, voting 24 jam).
+   `requestDisbursement` dengan CID tersebut (status `PENDING`, voting 40 detik pada demo).
    CID tidak diketik manual; nilainya berasal dari hasil unggah. Berkas bukti:
    JPEG/PNG/PDF/JSON, 4 MB/file, 8 MB bundle; pemeriksaan awal AI hanya
    memeriksa hingga 4 berkas JPEG/PNG/PDF. Hasil advisory tampil di UI dan
@@ -155,7 +155,7 @@ Hubungkan wallet dan pindahkan ke Monad Testnet (chain ID 10143).
 7. Investor membuka `/campaigns/[campaignId]/requests/[requestId]`, memeriksa
    bukti dan hash manifest, lalu memilih YES atau NO. Bobot = kontribusi
    tercatat.
-8. Tunggu 24 jam (atau time warp pada anvil untuk run lokal). Siapa pun
+8. Tunggu 40 detik (atau time warp pada anvil untuk run lokal). Siapa pun
    memanggil `finalizeRequest`. Hasil: `APPROVED` (kuorum >= 50% dan YES >
    NO), `REJECTED` (kuorum tercapai tetapi YES <= NO), atau `EXPIRED`
    (tanpa kuorum).

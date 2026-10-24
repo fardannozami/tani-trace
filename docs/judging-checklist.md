@@ -19,7 +19,7 @@ dipresentasikan sebagai produk finansial dengan dana nyata.
 | --- | --- | --- |
 | Announced functions work | Siap diuji | `forge test`, fuzz, invariant, Vitest, typecheck, lint, dan `next build` |
 | Live transaction on chain | Siap demo | `/faucet` → `/campaigns/new` → kontribusi → voting → pencairan → `/audit` |
-| Contract verified on explorer | Selesai | TANIToken, TaniTraceFunding, dan TANIFaucet berstatus `match` di Sourcify Monad |
+| Contract verified on explorer | Perlu ulang setelah redeploy | Deployment lama `match`; bytecode baru dengan voting 40 detik harus diverifikasi ulang |
 | Someone else can run from README | Siap | `contracts/script/setup.sh`, `scripts/deploy-and-update-env.sh`, setup lokal, dan runbook demo |
 
 ## Build in public

@@ -12,7 +12,7 @@ manifest; Next.js hanya membaca state/event dan menjadi adapter upload.
 |---|---|---|
 | `TANIToken` | `contracts/src/TANIToken.sol` | ERC-20 "TNC", supply tetap 1.000.000e18 (18 desimal), dicetak sekali ke deployer, tanpa mint publik, tanpa owner/admin/pause. |
 | `TANIFaucet` | `contracts/src/TANIFaucet.sol` | Saldo TNC pra-isi, satu klaim per alamat, `claimAmount` immutable, `ReentrancyGuard`. |
-| `TaniTraceFunding` | `contracts/src/TaniTraceFunding.sol` | Campaign, kontribusi ERC-20, transisi status, pengajuan pencairan, voting 24 jam, finalisasi permissionless, pencairan satu kali, refund, `completeCampaign`, view ber-paginasi (maks 100), tanpa owner/admin/pause. |
+| `TaniTraceFunding` | `contracts/src/TaniTraceFunding.sol` | Campaign, kontribusi ERC-20, transisi status, pengajuan pencairan, voting 40 detik pada deployment demo, finalisasi permissionless, pencairan satu kali, refund, `completeCampaign`, view ber-paginasi (maks 100), tanpa owner/admin/pause. |
 
 Kontrak tidak mempercayai frontend. Semua aturan bisnis (kuorum, mayoritas,
 pencairan satu kali, refund satu kali) ditegakkan di sini.
@@ -87,7 +87,7 @@ PENDING ──finalizeRequest──> APPROVED ──payDisbursement──> PAID
    └── finalizeRequest ──> EXPIRED
 ```
 
-- `PENDING`: voting berlangsung selama `VOTING_PERIOD = 24 hours`.
+- `PENDING`: voting berlangsung selama `VOTING_PERIOD = 40 seconds` pada deployment demo.
 - `APPROVED`: kuorum tercapai dan bobot YES > bobot NO.
 - `REJECTED`: kuorum tercapai tetapi YES <= NO (termasuk seri).
 - `EXPIRED`: voting ditutup tanpa kuorum.
@@ -100,7 +100,7 @@ Satu pengajuan aktif per campaign dijaga oleh `pendingRequestId` dan
 
 Konstanta on-chain:
 
-- `VOTING_PERIOD = 24 hours`.
+- `VOTING_PERIOD = 40 seconds` pada deployment demo; gunakan window lebih panjang untuk produksi.
 - `QUORUM_BPS = 5_000` (50%).
 - `BPS_DENOMINATOR = 10_000`.
 
