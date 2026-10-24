@@ -40,10 +40,6 @@ contract TaniTraceFunding is ReentrancyGuard {
     mapping(uint256 => uint256) public pendingRequestId;
     mapping(uint256 => uint256) public approvedRequestId;
 
-    // Satu pengajuan aktif (pending) dan satu pengajuan APPROVED belum dibayar per campaign.
-    mapping(uint256 => uint256) public pendingRequestId;
-    mapping(uint256 => uint256) public approvedRequestId;
-
     event CampaignCreated(uint256 indexed campaignId, address indexed farmer, string title, uint256 targetAmount, uint256 fundingDeadline);
     event ContributionMade(uint256 indexed campaignId, address indexed contributor, uint256 amount, uint256 totalRaised);
     event CampaignActivated(uint256 indexed campaignId, uint256 totalRaised, uint256 activatedAt);
