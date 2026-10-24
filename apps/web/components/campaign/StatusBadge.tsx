@@ -1,49 +1,23 @@
-export type CampaignStatusKey = "FUNDING" | "ACTIVE" | "FAILED" | "COMPLETED";
-export type RequestStatusKey = "PENDING" | "APPROVED" | "REJECTED" | "EXPIRED" | "PAID";
-export type StatusKey = CampaignStatusKey | RequestStatusKey;
+import { getStatusMeta, type CampaignStatusKey, type RequestStatusKey, type StatusKey } from "../../lib/status";
+
+export type { CampaignStatusKey, RequestStatusKey, StatusKey };
+export { getStatusMeta };
 
 /** Terima string enum (FUNDING, PAID, ...) atau angka enum on-chain (0..n) sesuai lib/types. */
 export interface StatusBadgeProps {
   status: StatusKey | number;
   /** Dipakai saat status berupa angka, karena Campaign & Request enum tumpang tindih. */
   domain?: "campaign" | "request";
+  /**
+   * Campaign yang deadline-nya sudah lewat tapi belum difinalisasi.
+   * Status on-chain masih FUNDING, jadi label "Pendanaan berjalan" menyesatkan.
+   */
+  deadlinePassed?: boolean;
   className?: string;
 }
 
-const CAMPAIGN_ORDER: CampaignStatusKey[] = ["FUNDING", "ACTIVE", "FAILED", "COMPLETED"];
-const REQUEST_ORDER: RequestStatusKey[] = ["PENDING", "APPROVED", "REJECTED", "EXPIRED", "PAID"];
-
-type Tone = "green" | "amber" | "red" | "neutral";
-
-const CAMPAIGN: Record<CampaignStatusKey, { label: string; tone: Tone }> = {
-  FUNDING: { label: "Pendanaan berjalan", tone: "amber" },
-  ACTIVE: { label: "Aktif", tone: "green" },
-  FAILED: { label: "Gagal", tone: "red" },
-  COMPLETED: { label: "Selesai", tone: "neutral" },
-};
-
-const REQUEST: Record<RequestStatusKey, { label: string; tone: Tone }> = {
-  PENDING: { label: "Menunggu voting", tone: "amber" },
-  APPROVED: { label: "Disetujui", tone: "green" },
-  REJECTED: { label: "Ditolak", tone: "red" },
-  EXPIRED: { label: "Kedaluwarsa", tone: "neutral" },
-  PAID: { label: "Dibayarkan", tone: "green" },
-};
-
-export function getStatusMeta(status: StatusKey | number, domain: "campaign" | "request" = "campaign"): { label: string; tone: Tone } {
-  const campaignMap: Record<string, { label: string; tone: Tone }> = CAMPAIGN;
-  const requestMap: Record<string, { label: string; tone: Tone }> = REQUEST;
-  if (typeof status === "number") {
-    const key = domain === "request" ? REQUEST_ORDER[status] : CAMPAIGN_ORDER[status];
-    if (!key) return { label: "Tidak diketahui", tone: "neutral" };
-    return domain === "request" ? requestMap[key] : campaignMap[key];
-  }
-  if (domain === "request") return requestMap[status] ?? { label: "Tidak diketahui", tone: "neutral" };
-  return campaignMap[status] ?? requestMap[status] ?? { label: "Tidak diketahui", tone: "neutral" };
-}
-
-export function StatusBadge({ status, domain = "campaign", className }: StatusBadgeProps) {
-  const { label, tone } = getStatusMeta(status, domain);
+export function StatusBadge({ status, domain = "campaign", deadlinePassed = false, className }: StatusBadgeProps) {
+  const { label, tone } = getStatusMeta(status, domain, deadlinePassed);
   return (
     <>
       <style href="tt-badges" precedence="tt-ui">{`

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Navigation } from "../../components/Navigation";
 import { usePublicClient } from "wagmi";
+import { useNowSeconds } from "../../hooks/useNowSeconds";
 import { FUNDING_ADDRESS, abi, isConfigured } from "../../lib/contract";
 import { decodeCampaign } from "../../lib/decode";
 import { CampaignStatus } from "../../lib/types";
@@ -19,6 +20,7 @@ export default function Campaigns() {
   const publicClient = usePublicClient();
   const [offset, setOffset] = useState(0);
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | undefined>(undefined);
+  const now = useNowSeconds();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["campaignsPage", offset, statusFilter],
@@ -95,6 +97,7 @@ export default function Campaigns() {
                   progress={c.targetAmount > 0n ? Number(c.totalRaised) / Number(c.targetAmount) : 0}
                   status={c.status}
                   deadlineLabel={formatDate(c.fundingDeadline)}
+                  deadlinePassed={now !== null && now >= Number(c.fundingDeadline)}
                   farmerLabel={formatAddress(c.farmer)}
                 />
               </Link>

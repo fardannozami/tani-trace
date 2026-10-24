@@ -15,6 +15,8 @@ export interface CampaignCardProps {
   status: StatusKey | number;
   /** Deadline sudah diformat, mis. "30 Okt 2026, 14.00". */
   deadlineLabel: string;
+  /** Deadline pendanaan sudah lewat, sehingga status tampil "Menunggu finalisasi". */
+  deadlinePassed?: boolean;
   /** Nama atau alamat pendek petani, mis. "0x1234…abcd" atau "Pak Surya". */
   farmerLabel: string;
   className?: string;
@@ -34,6 +36,7 @@ export function CampaignCard({
   progress,
   status,
   deadlineLabel,
+  deadlinePassed = false,
   farmerLabel,
   className,
 }: CampaignCardProps) {
@@ -64,7 +67,7 @@ export function CampaignCard({
       <article className={`tt-card tt-campaign${className ? ` ${className}` : ""}`} aria-label={`Campaign ${title}`}>
         <div className="tt-campaign-top">
           <span className="tt-campaign-crop">{crop}</span>
-          <StatusBadge status={status} />
+          <StatusBadge status={status} deadlinePassed={deadlinePassed} />
         </div>
         <h3>{title}</h3>
         <p className="tt-campaign-loc">{location}</p>

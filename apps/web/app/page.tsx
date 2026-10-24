@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Navigation } from "../components/Navigation";
 import { useCampaigns } from "../hooks/useCampaigns";
+import { useNowSeconds } from "../hooks/useNowSeconds";
 import { isConfigured } from "../lib/contract";
 import { formatTani, formatDate, formatAddress } from "../lib/format";
 
@@ -13,6 +14,7 @@ import { ErrorMessage } from "../components/ui/ErrorMessage";
 
 export default function Home() {
   const { data: campaigns, isLoading, error, refetch } = useCampaigns();
+  const now = useNowSeconds();
   const latest = (campaigns ?? []).slice(0, 6);
   const totalRaised = (campaigns ?? []).reduce((a, c) => a + c.totalRaised, 0n);
 
@@ -100,6 +102,7 @@ export default function Home() {
                       progress={c.targetAmount > 0n ? Number(c.totalRaised) / Number(c.targetAmount) : 0}
                       status={c.status}
                       deadlineLabel={formatDate(c.fundingDeadline)}
+                      deadlinePassed={now !== null && now >= Number(c.fundingDeadline)}
                       farmerLabel={formatAddress(c.farmer)}
                     />
                   </Link>
