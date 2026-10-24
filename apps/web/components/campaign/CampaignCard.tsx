@@ -65,7 +65,6 @@ export function CampaignCard({
         @media (prefers-reduced-motion: reduce){.tt-campaign:hover{transform:none;}}
       `}</style>
       <article className={`tt-card tt-campaign${className ? ` ${className}` : ""}`} aria-label={`Campaign ${title}`}>
-        <div className="tt-campaign-art" aria-hidden="true"><span>{crop.trim().slice(0, 1).toUpperCase() || "🌾"}</span><small>PROYEK TANI</small></div>
         <div className="tt-campaign-top">
           <span className="tt-campaign-crop">{crop}</span>
           <StatusBadge status={status} deadlinePassed={deadlinePassed} />

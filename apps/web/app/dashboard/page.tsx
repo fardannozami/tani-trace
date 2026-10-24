@@ -97,16 +97,16 @@ export default function Dashboard() {
     <>
       <Navigation />
       <main className="page">
-        <div className="eyebrow">Workspace petani</div>
-        <div className="page-title-row"><div><h1>Kelola musim tanam.</h1><p className="lead page-lead">Unggah bukti, ajukan pencairan, dan pantau keputusan investor dari satu tempat.</p></div><span className="workspace-mark">✦</span></div>
+        <div className="eyebrow">Workspace</div>
+        <h1>Dashboard</h1>
         {isLoading ? <Skeleton lines={3} /> : null}
         {!isLoading && (!campaigns || campaigns.length === 0) ? <EmptyState title="Belum ada campaign milik Anda" action={{ label: "Buat campaign", href: "/campaigns/new" }} /> : null}
         {campaigns && campaigns.length > 0 ? (
-          <section className="dashboard-section">
+          <section style={{ marginTop: 16 }}>
             <h3>Campaign Anda</h3>
-            <ul className="dashboard-list">
+            <ul>
               {campaigns.map((c) => (
-                <li className="dashboard-list-item" key={String(c.id)}>
+                <li key={String(c.id)}>
                   <StatusBadge status={c.status} /> #{String(c.id)} {c.title} · {formatTani(c.totalRaised)} / {formatTani(c.targetAmount)} TNC
                   <button type="button" className="button secondary" style={{ marginLeft: 8 }} onClick={() => setSelectedCampaign(String(c.id))}>Pilih</button>
                 </li>
@@ -115,7 +115,7 @@ export default function Dashboard() {
           </section>
         ) : null}
 
-        <section className="form-shell dashboard-section">
+        <section style={{ marginTop: 24 }}>
           <h3>Ajukan pencairan (dua langkah)</h3>
           <label>Campaign
             <select value={selectedCampaign} onChange={(e) => setSelectedCampaign(e.target.value)}>

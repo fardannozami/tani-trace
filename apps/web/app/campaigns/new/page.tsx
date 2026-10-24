@@ -72,13 +72,13 @@ export default function NewCampaign() {
     <>
       <Navigation />
       <main className="page">
-        <div className="eyebrow">Mulai musim baru</div>
-        <div className="page-title-row"><div><h1>Bawa cerita panenmu<br /><em>ke komunitas.</em></h1><p className="lead page-lead">Jelaskan kebutuhan modal dengan sederhana. Investor akan melihat target, rencana, dan batas waktunya secara transparan.</p></div><span className="workspace-mark">01</span></div>
+        <div className="eyebrow">Farmer workspace</div>
+        <h1>Buat campaign baru</h1>
         {!isConfigured ? <div className="notice">Kontrak belum dikonfigurasi.</div> : null}
         {localError ? <ErrorMessage error={localError} /> : null}
         {error ? <ErrorMessage error={error} onRetry={reset} /> : null}
         <TransactionStatus status={status} txHash={txHash ?? undefined} explorerUrl={EXPLORER_URL} />
-        <form onSubmit={onSubmit} className="form-shell campaign-form">
+        <form onSubmit={onSubmit} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12, maxWidth: 640 }}>
           <label>Judul<input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={LIMITS.title} required /></label>
           <label>Jenis tanaman<input value={crop} onChange={(e) => setCrop(e.target.value)} maxLength={LIMITS.crop} required /></label>
           <label>Lokasi<input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={LIMITS.location} required /></label>

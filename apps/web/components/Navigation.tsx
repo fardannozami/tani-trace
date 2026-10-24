@@ -19,11 +19,10 @@ export function Navigation() {
   );
   return (
     <header className="nav">
-      <Link href="/" className="brand" onClick={() => setOpen(false)}><span className="brand-mark">✦</span><span>Tani<span className="brand-accent">Trace</span></span></Link>
+      <Link href="/" className="brand" onClick={() => setOpen(false)}><span className="brand-mark">✦</span>TaniTrace</Link>
       <nav className="desktop-nav" aria-label="Navigasi utama">
         {links.map(renderLink)}
       </nav>
-      <span className="network-pill"><span className="network-dot" /> Monad Testnet</span>
       <WalletButton />
       <button className="mobile-toggle" type="button" aria-label={open ? "Tutup menu" : "Buka menu"} aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? "×" : "☰"}</button>
       {open ? <nav className="mobile-menu" aria-label="Navigasi mobile">{links.map(renderLink)}</nav> : null}
