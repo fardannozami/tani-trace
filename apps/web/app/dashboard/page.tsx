@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Navigation } from "../../components/Navigation";
 import { useWallet } from "../../hooks/useWallet";
 import { usePublicClient } from "wagmi";
+import { decodeCampaign } from "../../lib/decode";
 import { FUNDING_ADDRESS, abi, isConfigured, EXPLORER_URL } from "../../lib/contract";
 import { useContractTx } from "../../hooks/useContractTx";
 import { useCampaignActions } from "../../hooks/useCampaignActions";
@@ -44,9 +45,9 @@ export default function Dashboard() {
       const out: DashCampaign[] = [];
       for (const id of ids) {
         const raw = await publicClient!.readContract({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "campaigns", args: [id] });
-        const c = raw as { farmer?: string; title?: string; totalRaised?: bigint; targetAmount?: bigint; status?: number };
+        const c = decodeCampaign(id, raw as readonly unknown[]);
         if (c.farmer?.toLowerCase() === address?.toLowerCase()) {
-          out.push({ id, farmer: c.farmer, title: c.title, totalRaised: c.totalRaised ?? 0n, targetAmount: c.targetAmount ?? 0n, status: c.status ?? 0 });
+          out.push({ id, farmer: c.farmer, title: c.title, totalRaised: c.totalRaised, targetAmount: c.targetAmount, status: c.status });
         }
       }
       return out;

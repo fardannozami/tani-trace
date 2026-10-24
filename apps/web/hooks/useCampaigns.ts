@@ -2,42 +2,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { FUNDING_ADDRESS, abi } from "../lib/contract";
-import { CampaignStatus, type Campaign } from "../lib/types";
+import { decodeCampaign } from "../lib/decode";
+import { type Campaign, type CampaignStatus } from "../lib/types";
 
 async function fetchCampaign(publicClient: unknown, id: bigint): Promise<Campaign> {
   const pc = publicClient as { readContract: (args: unknown) => Promise<unknown> };
-  const raw = (await pc.readContract({
+  const raw = await pc.readContract({
     address: FUNDING_ADDRESS,
     abi: abi.funding,
     functionName: "campaigns",
     args: [id],
-  })) as {
-    farmer: `0x${string}`;
-    title: string;
-    crop: string;
-    location: string;
-    plan: string;
-    targetAmount: bigint;
-    totalRaised: bigint;
-    releasedTotal: bigint;
-    fundingDeadline: bigint;
-    status: number | bigint;
-    contributors: `0x${string}`[] | null | undefined;
-  };
-  return {
-    id,
-    farmer: raw.farmer,
-    title: raw.title,
-    crop: raw.crop,
-    location: raw.location,
-    plan: raw.plan,
-    targetAmount: raw.targetAmount,
-    totalRaised: raw.totalRaised,
-    releasedTotal: raw.releasedTotal,
-    fundingDeadline: raw.fundingDeadline,
-    status: raw.status as CampaignStatus,
-    contributors: raw.contributors ?? [],
-  };
+  });
+  return decodeCampaign(id, raw as readonly unknown[]);
 }
 
 export function useCampaigns(statusFilter?: CampaignStatus) {

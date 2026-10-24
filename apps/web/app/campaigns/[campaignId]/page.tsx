@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Navigation } from "../../../components/Navigation";
@@ -33,6 +33,7 @@ export default function CampaignDetail() {
   const publicClient = usePublicClient();
   const [amount, setAmount] = useState("");
   const [allowance, setAllowance] = useState<bigint>(0n);
+  const [shareUrl, setShareUrl] = useState("");
 
   // fetch allowance
   async function refreshAllowance() {
@@ -42,8 +43,22 @@ export default function CampaignDetail() {
       setAllowance((a as bigint) ?? 0n);
     } catch {}
   }
-  // call on mount
-  if (publicClient && address) refreshAllowance();
+  // useEffect (bukan saat render) agar tidak memicu pembacaan berulang
+  useEffect(() => {
+    let cancelled = false;
+    if (!publicClient || !address) {
+      setAllowance(0n);
+      return;
+    }
+    publicClient
+      .readContract({ address: TOKEN_ADDRESS, abi: abi.token, functionName: "allowance", args: [address, FUNDING_ADDRESS] })
+      .then((a) => { if (!cancelled) setAllowance((a as bigint) ?? 0n); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [publicClient, address]);
+
+  // URL baru tersedia di klien; render pertama memakai "" agar sama dengan server.
+  useEffect(() => setShareUrl(window.location.href), []);
 
   if (!isConfigured) return <><Navigation /><main className="page"><div className="notice">Kontrak belum dikonfigurasi.</div></main></>;
   if (isLoading) return <><Navigation /><main className="page"><Skeleton showProgress lines={4} /></main></>;
@@ -76,8 +91,6 @@ export default function CampaignDetail() {
   const needed = amount ? BigInt(Math.round(Number(amount) * 1e18)) : 0n;
   const needApprove = needed > 0n && allowance < needed;
 
-  const url = typeof window !== "undefined" ? window.location.href : "";
-
   return (
     <>
       <Navigation />
@@ -90,11 +103,11 @@ export default function CampaignDetail() {
         <p style={{ color: "var(--muted)" }}>{campaign.crop} · {campaign.location}</p>
         <div className="meter"><span style={{ width: `${Math.min(100, targetNum > 0 ? (raisedNum / targetNum) * 100 : 0)}%` }} /></div>
         <p><strong>{formatTani(campaign.totalRaised)} TNC</strong> dari target {formatTani(campaign.targetAmount)} TNC · Escrow tersedia {formatTani(escrow)} TNC</p>
-        <p>Deadline: {formatDate(campaign.fundingDeadline)} · {now < Number(campaign.fundingDeadline) ? `${Number(campaign.fundingDeadline) - now}s lagi` : "sudah lewat"}</p>
+        <p>Deadline: {formatDate(campaign.fundingDeadline)}{now !== null ? ` · ${now < Number(campaign.fundingDeadline) ? `${Number(campaign.fundingDeadline) - now}s lagi` : "sudah lewat"}` : ""}</p>
         <p>Petani: {formatAddress(campaign.farmer)}</p>
         <p>Rencana: {campaign.plan}</p>
 
-        <ShareCampaignCard url={url} title={campaign.title} />
+        <ShareCampaignCard url={shareUrl} title={campaign.title} />
 
         {error ? <ErrorMessage error={error} onRetry={reset} /> : null}
         <TransactionStatus status={status} explorerUrl={EXPLORER_URL} />
@@ -132,7 +145,7 @@ export default function CampaignDetail() {
           </section>
         ) : null}
 
-        {isConnected && address === campaign.farmer && campaign.status === CampaignStatus.FUNDING && now >= Number(campaign.fundingDeadline) ? (
+        {isConnected && address === campaign.farmer && campaign.status === CampaignStatus.FUNDING && now !== null && now >= Number(campaign.fundingDeadline) ? (
           <section style={{ marginTop: 24 }}>
             <h3>Finalisasi</h3>
             <button type="button" className="button secondary" onClick={() => actions.finalizeCampaign(id)} disabled={status === "pending" || status === "awaiting-wallet"}>Finalisasi campaign</button>

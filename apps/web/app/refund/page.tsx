@@ -3,6 +3,7 @@
 import { Navigation } from "../../components/Navigation";
 import { useWallet } from "../../hooks/useWallet";
 import { usePublicClient } from "wagmi";
+import { decodeCampaign } from "../../lib/decode";
 import { FUNDING_ADDRESS, abi, isConfigured, EXPLORER_URL } from "../../lib/contract";
 import { useContractTx } from "../../hooks/useContractTx";
 import { useCampaignActions } from "../../hooks/useCampaignActions";
@@ -28,13 +29,14 @@ export default function Refund() {
       type RefundRow = { id: bigint; title: string; contrib: bigint; farmer: `0x${string}` };
       const out: RefundRow[] = [];
       for (const id of ids) {
-        const raw = (await publicClient!.readContract({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "campaigns", args: [id] })) as { status: number; title: string; farmer: `0x${string}` };
-        if (raw.status !== CampaignStatus.FAILED) continue;
+        const raw = await publicClient!.readContract({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "campaigns", args: [id] });
+        const c = decodeCampaign(id, raw as readonly unknown[]);
+        if (c.status !== CampaignStatus.FAILED) continue;
         const contrib = (await publicClient!.readContract({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "contributionOf", args: [id, address!] })) as bigint;
         if (contrib <= 0n) continue;
         const refunded = (await publicClient!.readContract({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "refunded", args: [id, address!] })) as boolean;
         if (refunded) continue;
-        out.push({ id, title: raw.title, contrib, farmer: raw.farmer });
+        out.push({ id, title: c.title, contrib, farmer: c.farmer });
       }
       return out;
     },

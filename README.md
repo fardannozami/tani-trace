@@ -8,7 +8,7 @@
 <a href="https://github.com/fardannozami/tani-trace"><img src="https://img.shields.io/badge/repo-GitHub-0b1d15?style=for-the-badge&logo=github" alt="Repo GitHub"></a>
 <a href="https://docs.monad.xyz/developer-essentials/testnet"><img src="https://img.shields.io/badge/Monad-Testnet%20%C2%B7%2010143-836EF9?style=for-the-badge" alt="Monad Testnet"></a>
 <img src="https://img.shields.io/badge/Foundry-95%20test-1B1B1B?style=for-the-badge" alt="95 Foundry tests">
-<img src="https://img.shields.io/badge/Frontend-35%20test-2c6a48?style=for-the-badge" alt="35 frontend tests">
+<img src="https://img.shields.io/badge/Frontend-38%20test-2c6a48?style=for-the-badge" alt="38 frontend tests">
 </p>
 
 <p>
@@ -59,7 +59,7 @@ on-chain dan tidak pernah memblokir transaksi.
 | 🌐 **Aplikasi** | Jalankan lokal: `http://localhost:3000` (lihat [panduan](#-menjalankan-di-lokal-langkah-demi-langkah)) |
 | 🔗 **Deploy** | Monad Testnet, blok `73725698` · [deployments/monadTestnet.json](deployments/monadTestnet.json) |
 | 📜 **Kontrak** | `contracts/src/` — `TANIToken`, `TANIFaucet`, `TaniTraceFunding` |
-| ✅ **Hasil uji** | `forge test` **95 lulus** · Vitest **35 lulus** · `tsc`, ESLint, `next build` lulus |
+| ✅ **Hasil uji** | `forge test` **95 lulus** · Vitest **38 lulus** · `tsc`, ESLint, `next build` lulus |
 | ⛓️ **Jaringan** | Monad Testnet · chain ID `10143` · gas dibayar dalam **MON** |
 | 🪙 **Token** | TNC ("Tani Token"), 18 desimal, supply tetap 1.000.000, tanpa owner |
 | 🧾 **Testnet saja** | TNC tidak punya nilai uang dan tidak bisa ditukar |
@@ -84,7 +84,7 @@ frontend recomputes the manifest hash and compares it with the on-chain value. A
 optional Gemini-based pre-check is advisory only: it is stored inside the IPFS
 manifest, excluded from the hash, and never blocks uploads, transactions, or
 on-chain logic. There is no admin, no pause, no upgrade path, and no permanent
-backend or database. Tests: 95 Foundry (unit, fuzz, invariant) and 35 frontend
+backend or database. Tests: 95 Foundry (unit, fuzz, invariant) and 38 frontend
 (Vitest). The contracts are deployed on Monad Testnet (see
 `deployments/monadTestnet.json`); the frontend is not hosted yet and runs locally.
 </details>
@@ -494,7 +494,7 @@ petunjuk konfigurasi, bukan error.
 cd apps/web
 bun run typecheck     # tsc --noEmit
 bun run lint          # ESLint 9
-bun run test          # Vitest (35 test)
+bun run test          # Vitest (38 test)
 bun run build         # production build
 bash scripts/sync-abi.sh   # segarkan ABI frontend dari contracts/out
 ```
@@ -550,7 +550,7 @@ diverifikasi ulang**, karena diunggah oleh pemohon.
 
 ```bash
 cd contracts && forge build && forge test    # 95 test Foundry
-cd apps/web && bun run test                  # 35 test Vitest
+cd apps/web && bun run test                  # 38 test Vitest
 cd apps/web && bun run typecheck && bun run lint && bun run build
 ```
 
@@ -562,9 +562,10 @@ refund campaign sukses, pengajuan pada campaign gagal/selesai, penutupan campaig
 dengan kewajiban tersisa, reentrancy dan kegagalan transfer, emisi event, invariant
 escrow, serta paginasi.
 
-Frontend (35) mencakup: paritas `computeManifestHash` dengan kontrak (diverifikasi
+Frontend (38) mencakup: paritas `computeManifestHash` dengan kontrak (diverifikasi
 silang Solidity ↔ viem), invarians hash ketika `advisory` ada/tidak ada,
-serialisasi manifest, validasi MIME/ukuran, format angka/tanggal/alamat, helper
+serialisasi manifest, validasi MIME/ukuran, format angka/tanggal/alamat, decoder
+array posisional viem (`campaigns`/`requests`), helper
 tipe (`availableEscrow`, `quorumRequired`, `totalVoted`), dan normalisasi output
 advisory.
 
@@ -577,7 +578,7 @@ apps/web/    Next.js App Router
   components/ UI campaign & ui
   hooks/      useContractTx, useCampaign(s), useCampaignActions, useWallet, useTokenInfo, useIPFS, useAuditFeed, useNowSeconds
   lib/        ABI, alamat, manifest hash, tipe, format, event parser
-  test/       Vitest (35 test)
+  test/       Vitest (38 test)
 docs/        PRD, desain, arsitektur, build guide, demo script, tasks
 deployments/ hasil deploy (dibuat otomatis; belum ada sampai deploy dijalankan)
 ```

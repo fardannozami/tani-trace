@@ -1,9 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export function useNowSeconds() {
-  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+/**
+ * Waktu sekarang (detik UNIX), atau `null` sebelum komponen ter-mount.
+ * Nilai awal `null` penting: `Date.now()` di server dan klien berbeda, dan
+ * selisih itu memicu hydration mismatch pada teks hitung mundur.
+ */
+export function useNowSeconds(): number | null {
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
+    setNow(Math.floor(Date.now() / 1000));
     const id = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000);
     return () => clearInterval(id);
   }, []);

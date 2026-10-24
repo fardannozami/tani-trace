@@ -14,7 +14,9 @@ export function formatTaniRaw(value: bigint, decimals = 18): string {
 export function formatDate(ts: bigint | number): string {
   const ms = typeof ts === "bigint" ? Number(ts) * 1000 : ts * 1000;
   if (!Number.isFinite(ms)) return "-";
-  return new Date(ms).toLocaleString("id-ID");
+  // Zona waktu dipatok agar output server dan browser selalu sama
+  // (mencegah hydration mismatch).
+  return new Date(ms).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
 }
 
 export function formatAddress(addr: string): string {

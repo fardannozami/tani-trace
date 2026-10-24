@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Navigation } from "../../components/Navigation";
 import { usePublicClient } from "wagmi";
 import { FUNDING_ADDRESS, abi, isConfigured } from "../../lib/contract";
+import { decodeCampaign } from "../../lib/decode";
 import { CampaignStatus } from "../../lib/types";
 import { formatTani, formatDate, formatAddress } from "../../lib/format";
 import { CampaignCard } from "../../components/campaign/CampaignCard";
@@ -29,7 +30,7 @@ export default function Campaigns() {
         functionName: "getCampaignIds",
         args: [BigInt(offset), BigInt(PAGE_SIZE)],
       })) as bigint[];
-      const camps = await Promise.all(
+      const mapped = await Promise.all(
         ids.map(async (id) => {
           const raw = await publicClient!.readContract({
             address: FUNDING_ADDRESS,
@@ -37,23 +38,9 @@ export default function Campaigns() {
             functionName: "campaigns",
             args: [id],
           });
-          return { id, raw: raw as { farmer: `0x${string}`; title: string; crop: string; location: string; plan: string; targetAmount: bigint; totalRaised: bigint; releasedTotal: bigint; fundingDeadline: bigint; status: number | bigint; contributors: `0x${string}`[] | null | undefined } };
+          return decodeCampaign(id, raw as readonly unknown[]);
         }),
       );
-      const mapped = camps.map(({ id, raw }) => ({
-        id,
-        farmer: raw.farmer,
-        title: raw.title,
-        crop: raw.crop,
-        location: raw.location,
-        plan: raw.plan,
-        targetAmount: raw.targetAmount,
-        totalRaised: raw.totalRaised,
-        releasedTotal: raw.releasedTotal,
-        fundingDeadline: raw.fundingDeadline,
-        status: raw.status as CampaignStatus,
-        contributors: raw.contributors ?? [],
-      }));
       if (statusFilter === undefined) return mapped;
       return mapped.filter((c) => c.status === statusFilter);
     },
