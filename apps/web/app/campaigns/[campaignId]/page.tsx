@@ -83,6 +83,7 @@ export default function CampaignDetail() {
   const targetReached = campaign.totalRaised >= campaign.targetAmount;
   const amountWei = parseTani(amount);
   const overLimit = amountWei !== null && amountWei > remainingWei;
+  const insufficientBalance = amountWei !== null && amountWei > tokenInfo.balance;
   const countdownText = now === null ? null : deadlinePassed ? "sudah berakhir" : countdown(Number(campaign.fundingDeadline) - now);
 
   async function handleApprove() {
@@ -93,6 +94,10 @@ export default function CampaignDetail() {
     }
     if (amt > remainingWei) {
       setFormError(`Jumlah melebihi sisa target. Maksimal ${formatTani(remainingWei)} TNC.`);
+      return;
+    }
+    if (amt > tokenInfo.balance) {
+      setFormError(`Saldo TNC Anda hanya ${formatTani(tokenInfo.balance)} TNC. Klaim TNC testnet dari faucet terlebih dahulu.`);
       return;
     }
     setFormError(null);
@@ -109,6 +114,10 @@ export default function CampaignDetail() {
     }
     if (amt > remainingWei) {
       setFormError(`Jumlah melebihi sisa target. Maksimal ${formatTani(remainingWei)} TNC.`);
+      return;
+    }
+    if (amt > tokenInfo.balance) {
+      setFormError(`Saldo TNC Anda hanya ${formatTani(tokenInfo.balance)} TNC. Klaim TNC testnet dari faucet terlebih dahulu.`);
       return;
     }
     setFormError(null);
@@ -172,12 +181,16 @@ export default function CampaignDetail() {
                     aria-invalid={overLimit}
                   />
                   {needApprove ? (
-                    <button type="button" className="button secondary" onClick={handleApprove} disabled={!isMonad || status === "pending" || status === "awaiting-wallet" || overLimit}>Approve</button>
+                    <button type="button" className="button secondary" onClick={handleApprove} disabled={!isMonad || status === "pending" || status === "awaiting-wallet" || overLimit || insufficientBalance}>Approve</button>
                   ) : null}
-                  <button type="button" className="button" onClick={handleContribute} disabled={!isMonad || status === "pending" || status === "awaiting-wallet" || needApprove || overLimit}>Kontribusi</button>
+                  <button type="button" className="button" onClick={handleContribute} disabled={!isMonad || status === "pending" || status === "awaiting-wallet" || needApprove || overLimit || insufficientBalance}>Kontribusi</button>
                 </div>
                 {overLimit ? (
                   <p style={{ color: "var(--danger)" }}>Jumlah melebihi sisa target. Maksimal {formatTani(remainingWei)} TNC.</p>
+                ) : insufficientBalance ? (
+                  <p style={{ color: "var(--danger)" }}>
+                    Saldo Anda {formatTani(tokenInfo.balance)} TNC, kurang dari jumlah yang dipilih. <Link href="/faucet" style={{ textDecoration: "underline", fontWeight: 700 }}>Klaim TNC testnet di faucet</Link>.
+                  </p>
                 ) : formError ? (
                   <p style={{ color: "var(--danger)" }}>{formError}</p>
                 ) : null}
