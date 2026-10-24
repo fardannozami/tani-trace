@@ -8,8 +8,34 @@ import {TaniTraceFunding} from "../src/TaniTraceFunding.sol";
 
 contract Deploy is Script {
     function run() external returns (TANIToken token, TANIFaucet faucet, TaniTraceFunding funding) {
-        uint256 key = vm.envUint("PRIVATE_KEY"); uint256 allocation = vm.envOr("FAUCET_ALLOCATION", uint256(200_000));
-        vm.startBroadcast(key); token = new TANIToken(); funding = new TaniTraceFunding(token); faucet = new TANIFaucet(token, 100 ether); token.transfer(address(faucet), allocation * 1 ether); vm.stopBroadcast();
-        console2.log("TaniTrace v2 deployed on Monad Testnet (chainId 10143)"); console2.logAddress(address(token)); console2.logAddress(address(funding)); console2.logAddress(address(faucet));
+        uint256 key = vm.envUint("PRIVATE_KEY");
+        uint256 allocation = vm.envOr("FAUCET_ALLOCATION", uint256(200_000));
+        uint256 claimAmount = vm.envOr("FAUCET_CLAIM_AMOUNT", uint256(100));
+        address deployer = vm.addr(key);
+
+        vm.startBroadcast(key);
+        token = new TANIToken();
+        funding = new TaniTraceFunding(token);
+        faucet = new TANIFaucet(token, claimAmount * 1 ether);
+        token.transfer(address(faucet), allocation * 1 ether);
+        vm.stopBroadcast();
+
+        console2.log("TaniTrace v2 berhasil dideploy.");
+        console2.log("  network          : Monad Testnet (chainId 10143)");
+        console2.log("  TANIToken        :", address(token));
+        console2.log("  TaniTraceFunding :", address(funding));
+        console2.log("  TANIFaucet       :", address(faucet));
+        console2.log("  deployer         :", deployer);
+        console2.log("  deployedAtBlock  :", block.number);
+
+        string memory json = vm.serializeAddress("tanitrace", "token", address(token));
+        json = vm.serializeAddress("tanitrace", "funding", address(funding));
+        json = vm.serializeAddress("tanitrace", "faucet", address(faucet));
+        json = vm.serializeAddress("tanitrace", "deployer", deployer);
+        json = vm.serializeUint("tanitrace", "chainId", block.chainid);
+        json = vm.serializeUint("tanitrace", "deployedAtBlock", block.number);
+        string memory out = vm.envOr("DEPLOYMENT_OUT", string("../deployments/monadTestnet.json"));
+        vm.writeJson(json, out);
+        console2.log("  deployment file  :", out);
     }
 }
