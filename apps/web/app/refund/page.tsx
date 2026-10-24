@@ -5,7 +5,6 @@ import { useWallet } from "../../hooks/useWallet";
 import { usePublicClient } from "wagmi";
 import { decodeCampaign } from "../../lib/decode";
 import { FUNDING_ADDRESS, abi, isConfigured, EXPLORER_URL } from "../../lib/contract";
-import { useContractTx } from "../../hooks/useContractTx";
 import { useCampaignActions } from "../../hooks/useCampaignActions";
 import { CampaignStatus } from "../../lib/types";
 import { formatTani } from "../../lib/format";
@@ -18,7 +17,6 @@ import { useQuery } from "@tanstack/react-query";
 export default function Refund() {
   const { address, isConnected, isMonad } = useWallet();
   const publicClient = usePublicClient();
-  const { status, error, reset } = useContractTx();
   const actions = useCampaignActions();
 
   const { data, isLoading } = useQuery({
@@ -52,8 +50,8 @@ export default function Refund() {
         <div className="eyebrow">Safety rail</div>
         <h1>Refund</h1>
         {isLoading ? <Skeleton lines={3} /> : null}
-        {error ? <ErrorMessage error={error} onRetry={reset} /> : null}
-        <TransactionStatus status={status} explorerUrl={EXPLORER_URL} />
+        {actions.error ? <ErrorMessage error={actions.error} onRetry={actions.reset} /> : null}
+        <TransactionStatus status={actions.status} txHash={actions.txHash ?? undefined} explorerUrl={EXPLORER_URL} />
         {!isLoading && (!data || data.length === 0) ? <EmptyState title="Tidak ada refund tersedia" description="Anda tidak memiliki kontribusi pada campaign gagal yang belum diklaim." /> : null}
         <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 8, marginTop: 16 }}>
           {(data ?? []).map((c) => (
@@ -62,7 +60,7 @@ export default function Refund() {
                 <strong>#{String(c.id)} {c.title}</strong>
                 <div style={{ fontSize: 13, color: "var(--muted)" }}>Kontribusi: {formatTani(c.contrib)} TNC</div>
               </div>
-              <button type="button" className="button" onClick={() => actions.claimRefund(c.id)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Klaim refund</button>
+              <button type="button" className="button" onClick={() => actions.claimRefund(c.id)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Klaim refund</button>
             </li>
           ))}
         </ul>

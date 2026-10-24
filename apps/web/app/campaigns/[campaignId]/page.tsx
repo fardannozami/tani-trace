@@ -26,7 +26,7 @@ export default function CampaignDetail() {
   const id = BigInt(String(params?.campaignId ?? "0"));
   const { address, isConnected, isMonad } = useWallet();
   const { campaign, requests, contribution, isLoading, refetch } = useCampaign(id);
-  const { execute: execTx, status, error, reset } = useContractTx();
+  const { execute: execTx, status, error, txHash, reset } = useContractTx();
   const actions = useCampaignActions();
   const now = useNowSeconds();
   const tokenInfo = useTokenInfo();
@@ -143,7 +143,9 @@ export default function CampaignDetail() {
         <ShareCampaignCard url={shareUrl} title={campaign.title} />
 
         {error ? <ErrorMessage error={error} onRetry={reset} /> : null}
-        <TransactionStatus status={status} explorerUrl={EXPLORER_URL} />
+        <TransactionStatus status={status} txHash={txHash ?? undefined} explorerUrl={EXPLORER_URL} />
+        {actions.error ? <ErrorMessage error={actions.error} onRetry={actions.reset} /> : null}
+        <TransactionStatus status={actions.status} txHash={actions.txHash ?? undefined} explorerUrl={EXPLORER_URL} />
 
         {/* Kontributor: hanya saat pendanaan masih dibuka */}
         {isConnected && campaign.status === CampaignStatus.FUNDING && !deadlinePassed ? (
@@ -189,7 +191,7 @@ export default function CampaignDetail() {
         {isConnected && address === campaign.farmer && campaign.status === CampaignStatus.ACTIVE ? (
           <section style={{ marginTop: 24 }}>
             <h3>Aksi petani</h3>
-            <button type="button" className="button secondary" onClick={() => actions.completeCampaign(id)} disabled={status === "pending" || status === "awaiting-wallet"}>Selesaikan campaign</button>
+            <button type="button" className="button secondary" onClick={() => actions.completeCampaign(id)} disabled={actions.status === "pending" || actions.status === "awaiting-wallet"}>Selesaikan campaign</button>
           </section>
         ) : null}
 
@@ -197,7 +199,7 @@ export default function CampaignDetail() {
           <section style={{ marginTop: 24 }}>
             <h3>Refund</h3>
             {contribWei > 0n ? (
-              <button type="button" className="button" onClick={() => actions.claimRefund(id)} disabled={status === "pending" || status === "awaiting-wallet"}>Klaim refund</button>
+              <button type="button" className="button" onClick={() => actions.claimRefund(id)} disabled={actions.status === "pending" || actions.status === "awaiting-wallet"}>Klaim refund</button>
             ) : (
               <p>Anda tidak memiliki kontribusi pada campaign ini.</p>
             )}
@@ -217,7 +219,7 @@ export default function CampaignDetail() {
               <p>Target belum tercapai (terkumpul {formatTani(campaign.totalRaised)} TNC dari {formatTani(campaign.targetAmount)} TNC). Finalisasi akan menandai campaign gagal dan membuka refund bagi kontributor.</p>
             )}
             {isConnected ? (
-              <button type="button" className="button" onClick={() => actions.finalizeCampaign(id)} disabled={status === "pending" || status === "awaiting-wallet"}>
+              <button type="button" className="button" onClick={() => actions.finalizeCampaign(id)} disabled={actions.status === "pending" || actions.status === "awaiting-wallet"}>
                 {targetReached ? "Aktifkan pendanaan" : "Finalisasi & tandai gagal"}
               </button>
             ) : (

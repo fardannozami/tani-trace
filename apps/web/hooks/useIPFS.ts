@@ -1,7 +1,7 @@
 "use client";
 import { useCallback } from "react";
 import { useWalletClient } from "wagmi";
-import { evidenceMimeType, MAX_UPLOAD_BYTES, MAX_BUNDLE_BYTES } from "../lib/file-types";
+import { evidenceMimeType, isInspectableEvidenceMime, MAX_UPLOAD_BYTES, MAX_BUNDLE_BYTES } from "../lib/file-types";
 import { serializeManifest, type EvidenceManifest } from "../lib/manifest";
 import { normalizeAdvisoryReport } from "../lib/advisory";
 
@@ -19,9 +19,9 @@ export function useIPFS() {
   const uploadFile = useCallback(async (file: File) => {
     if (!walletClient?.account) throw new Error("wallet-missing");
     const mime = evidenceMimeType(file);
-    if (!mime) throw new Error("bad-mime");
-    if (file.size > MAX_UPLOAD_BYTES) throw new Error("file-too-large");
-    const { nonce, token } = await getNonce(walletClient.account.address);
+    if (!mime) throw new Error("unsupported_media_type");
+    if (file.size > MAX_UPLOAD_BYTES) throw new Error("payload_too_large");
+    const { nonce, token, expiresAt } = await getNonce(walletClient.account.address);
     const message = `TaniTrace upload\nnonce:${nonce}\ntoken:${token}\nsize:${file.size}\nname:${file.name}`;
     const signature = await walletClient.signMessage({ message });
     const form = new FormData();
@@ -32,6 +32,7 @@ export function useIPFS() {
     form.append("signature", signature);
     form.append("size", String(file.size));
     form.append("name", file.name);
+    form.append("expiresAt", String(expiresAt));
     const res = await fetch("/api/upload", { method: "POST", body: form });
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error || "upload failed");
@@ -39,10 +40,9 @@ export function useIPFS() {
   }, [walletClient, getNonce]);
 
   const runAdvisory = useCallback(async (files: File[], purpose: string, notes?: string) => {
-    if (!walletClient?.account) return null;
+    if (!walletClient?.account) return { report: null, error: "Hubungkan wallet untuk menjalankan pemeriksaan AI." };
     try {
-      // upload files first not here; advisory expects already? spec: call after file upload. We'll just send metadata.
-      const { nonce, token } = await getNonce(walletClient.account.address);
+      const { nonce, token, expiresAt } = await getNonce(walletClient.account.address);
       const totalSize = files.reduce((a, f) => a + f.size, 0);
       const message = `TaniTrace advisory\nnonce:${nonce}\ntoken:${token}\nsize:${totalSize}`;
       const signature = await walletClient.signMessage({ message });
@@ -52,27 +52,45 @@ export function useIPFS() {
       form.append("nonce", nonce);
       form.append("token", token);
       form.append("signature", signature);
+      form.append("expiresAt", String(expiresAt));
       form.append("purpose", purpose);
       if (notes) form.append("notes", notes);
       const res = await fetch("/api/evidence/advisory", { method: "POST", body: form });
       const data = await res.json();
-      if (!res.ok) return null;
-      return normalizeAdvisoryReport(data?.report ?? data);
-    } catch {
-      return null;
+      if (!res.ok || data?.error) {
+        const errors: Record<string, string> = {
+          AI_NOT_CONFIGURED: "Pemeriksaan AI belum dikonfigurasi di server.",
+          AI_FAILED: "Layanan AI gagal menganalisis berkas. Berkas tetap berhasil diunggah.",
+          RATE_LIMITED: "Batas pemeriksaan AI tercapai. Coba lagi dalam beberapa menit.",
+          BAD_MIME: "Pemeriksaan AI hanya mendukung JPG, PNG, dan PDF.",
+          BAD_PURPOSE: "Isi tujuan pencairan sebelum memeriksa berkas.",
+          BAD_FILE_COUNT: "Pemeriksaan AI menerima maksimal 4 berkas sekaligus.",
+          FILE_TOO_LARGE: "Ukuran berkas untuk pemeriksaan AI maksimal 4 MB per berkas.",
+          BUNDLE_TOO_LARGE: "Ukuran total berkas untuk pemeriksaan AI maksimal 8 MB.",
+        };
+        const code = typeof data?.error === "string" ? data.error : "";
+        return { report: null, error: errors[code] ?? `Pemeriksaan AI gagal (${code || res.status}). Berkas tetap berhasil diunggah.` };
+      }
+      const report = normalizeAdvisoryReport(data?.report);
+      return report
+        ? { report, error: null }
+        : { report: null, error: "AI tidak mengembalikan hasil pemeriksaan yang dapat ditampilkan." };
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "koneksi ke layanan AI gagal";
+      return { report: null, error: `Pemeriksaan AI tidak tersedia: ${detail}. Berkas tetap berhasil diunggah.` };
     }
   }, [walletClient, getNonce]);
 
   const uploadManifest = useCallback(async (manifest: EvidenceManifest) => {
     if (!walletClient?.account) throw new Error("wallet-missing");
-    const { nonce, token } = await getNonce(walletClient.account.address);
+    const { nonce, token, expiresAt } = await getNonce(walletClient.account.address);
     const body = serializeManifest(manifest);
     const message = `TaniTrace manifest\nnonce:${nonce}\ntoken:${token}\nsize:${body.length}`;
     const signature = await walletClient.signMessage({ message });
     const res = await fetch("/api/upload/manifest", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: walletClient.account.address, nonce, token, signature, manifest }),
+      body: JSON.stringify({ address: walletClient.account.address, nonce, token, signature, expiresAt, manifest }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error || "manifest upload failed");
@@ -83,8 +101,26 @@ export function useIPFS() {
     const total = files.reduce((a, f) => a + f.size, 0);
     if (total > MAX_BUNDLE_BYTES) throw new Error("bundle-too-large");
     const cids = await Promise.all(files.map((f) => uploadFile(f)));
-    const advisory = await runAdvisory(files, purpose, notes);
-    return { fileCids: cids, advisory };
+    const inspectableFiles = files.filter((file) => {
+      const mime = evidenceMimeType(file);
+      return mime !== null && isInspectableEvidenceMime(mime);
+    });
+    if (inspectableFiles.length === 0) {
+      return {
+        fileCids: cids,
+        advisory: null,
+        advisoryError: "Berkas berhasil diunggah. Pemeriksaan AI hanya mendukung JPG, PNG, dan PDF.",
+      };
+    }
+    if (inspectableFiles.length > 4) {
+      return {
+        fileCids: cids,
+        advisory: null,
+        advisoryError: "Berkas berhasil diunggah. Pemeriksaan AI hanya dapat memeriksa maksimal 4 berkas sekaligus.",
+      };
+    }
+    const result = await runAdvisory(inspectableFiles, purpose, notes);
+    return { fileCids: cids, advisory: result.report, advisoryError: result.error };
   }, [uploadFile, runAdvisory]);
 
   return { uploadFile, uploadManifest, runAdvisory, uploadBundle, getNonce };

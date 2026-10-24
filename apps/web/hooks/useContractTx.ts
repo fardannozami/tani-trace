@@ -46,10 +46,12 @@ export function useContractTx() {
   const chainId = useChainId();
   const [status, setStatus] = useState<TxStatus>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
 
   const execute = useCallback(
     async (params: { address: `0x${string}`; abi: unknown; functionName: string; args?: readonly unknown[] }) => {
       setError(null);
+      setTxHash(null);
       setStatus("idle");
       try {
         assertMonadTestnet(chainId);
@@ -69,6 +71,7 @@ export function useContractTx() {
           gas,
           chain: monadTestnet,
         });
+        setTxHash(hash);
         setStatus("pending");
         const receipt = await publicClient!.waitForTransactionReceipt({ hash });
         if (receipt.status !== "success") throw new Error("transaction failed");
@@ -83,5 +86,5 @@ export function useContractTx() {
     [walletClient, publicClient, chainId],
   );
 
-  return { execute, status, error, reset: () => { setStatus("idle"); setError(null); } };
+  return { execute, status, error, txHash, reset: () => { setStatus("idle"); setError(null); setTxHash(null); } };
 }

@@ -3,7 +3,7 @@ import type { FlexibleError } from "../ui/ErrorMessage";
 
 export interface AdvisoryFinding {
   severity?: string;
-  title: string;
+  label: string;
   detail?: string;
 }
 
@@ -84,7 +84,7 @@ export function AdvisoryCard({ report, error, busy, className }: AdvisoryCardPro
                       <span className="tt-advisory-dot" aria-hidden="true" />
                       <div>
                         <h4>
-                          {f.title}
+                          {f.label}
                           <span className="tt-advisory-sev">{SEVERITY_LABEL[tone]}</span>
                         </h4>
                         {f.detail ? <p>{f.detail}</p> : null}

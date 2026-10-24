@@ -3,10 +3,11 @@ import { FUNDING_ADDRESS, abi } from "../lib/contract";
 import { useContractTx } from "./useContractTx";
 
 export function useCampaignActions() {
-  const { execute, status, error, reset } = useContractTx();
+  const { execute, status, error, txHash, reset } = useContractTx();
   return {
     status,
     error,
+    txHash,
     reset,
     finalizeCampaign: (id: bigint) =>
       execute({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "finalizeCampaign", args: [id] }),

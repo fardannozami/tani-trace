@@ -3,10 +3,10 @@ import { verifyAuth } from "../_lib/auth";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
-  const { address, nonce, token, signature, manifest } = body;
+  const { address, nonce, token, signature, manifest, expiresAt } = body;
   const serialized = JSON.stringify(manifest ?? {});
   const size = serialized.length;
-  const auth = await verifyAuth({ address, nonce, token, signature }, `TaniTrace manifest\nnonce:${nonce}\ntoken:${token}\nsize:${size}`);
+  const auth = await verifyAuth({ address, nonce, token, signature, expiresAt: Number(expiresAt) || 0 }, `TaniTrace manifest\nnonce:${nonce}\ntoken:${token}\nsize:${size}`);
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status || 401 });
 
   const jwt = process.env.PINATA_JWT;

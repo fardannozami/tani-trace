@@ -5,7 +5,6 @@ import { Navigation } from "../../../../../components/Navigation";
 import { useWallet } from "../../../../../hooks/useWallet";
 import { useCampaign } from "../../../../../hooks/useCampaign";
 import { useVote } from "../../../../../hooks/useCampaign";
-import { useContractTx } from "../../../../../hooks/useContractTx";
 import { useCampaignActions } from "../../../../../hooks/useCampaignActions";
 import { useNowSeconds } from "../../../../../hooks/useNowSeconds";
 import { usePublicClient } from "wagmi";
@@ -29,7 +28,6 @@ export default function RequestDetail() {
   const [request, setRequest] = useState<Request | null>(null);
   const [loaded, setLoaded] = useState(false);
   const { data: voted } = useVote(requestId, address);
-  const { status, error, reset } = useContractTx();
   const actions = useCampaignActions();
   const now = useNowSeconds();
 
@@ -80,23 +78,23 @@ export default function RequestDetail() {
         <p>Manifest hash: {hashMatch ? "✓ cocok" : "✗ tidak cocok"}</p>
         <p>Bukti: <a href={evidenceUrl} target="_blank" rel="noopener noreferrer">{request.evidenceCid}</a></p>
 
-        {error ? <ErrorMessage error={error} onRetry={reset} /> : null}
-        <TransactionStatus status={status} explorerUrl={EXPLORER_URL} />
+        {actions.error ? <ErrorMessage error={actions.error} onRetry={actions.reset} /> : null}
+        <TransactionStatus status={actions.status} txHash={actions.txHash ?? undefined} explorerUrl={EXPLORER_URL} />
 
         {isConnected && now !== null && !voted && request.status === 0 && now < Number(request.votingDeadline) ? (
           <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-            <button type="button" className="button" onClick={() => actions.vote(requestId, true)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Vote YA</button>
-            <button type="button" className="button secondary" onClick={() => actions.vote(requestId, false)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Vote TIDAK</button>
+            <button type="button" className="button" onClick={() => actions.vote(requestId, true)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Vote YA</button>
+            <button type="button" className="button secondary" onClick={() => actions.vote(requestId, false)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Vote TIDAK</button>
           </div>
         ) : null}
         {voted ? <p>Anda sudah memberikan suara.</p> : null}
 
         {now !== null && now >= Number(request.votingDeadline) && request.status === 0 ? (
-          <button type="button" className="button secondary" style={{ marginTop: 16 }} onClick={() => actions.finalizeRequest(requestId)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Finalisasi pengajuan</button>
+          <button type="button" className="button secondary" style={{ marginTop: 16 }} onClick={() => actions.finalizeRequest(requestId)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Finalisasi pengajuan</button>
         ) : null}
 
         {request.status === 1 && isConnected && address === request.farmer ? (
-          <button type="button" className="button" style={{ marginTop: 16 }} onClick={() => actions.payDisbursement(requestId)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Bayar pencairan</button>
+          <button type="button" className="button" style={{ marginTop: 16 }} onClick={() => actions.payDisbursement(requestId)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Bayar pencairan</button>
         ) : null}
       </main>
     </>

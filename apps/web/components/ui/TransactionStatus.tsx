@@ -59,7 +59,7 @@ export function TransactionStatus({ status, txHash, message, explorerUrl }: Tran
           <p className="tt-tx-title">{defaultTitle}</p>
           {message ? <p className="tt-tx-msg">{message}</p> : null}
           {txHash && explorerUrl ? (
-            <a className="tt-tx-hash" href={explorerUrl} target="_blank" rel="noopener noreferrer" aria-label={`Lihat transaksi ${shorten(txHash)} di explorer`}>
+            <a className="tt-tx-hash" href={`${explorerUrl.replace(/\/$/, "")}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" aria-label={`Lihat transaksi ${shorten(txHash)} di explorer`}>
               Lihat di explorer · {shorten(txHash)}
             </a>
           ) : null}

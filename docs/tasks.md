@@ -41,7 +41,7 @@ Simbol token: **TNC** ("Tani Token", 18 desimal).
 - [x] Foundry unit/integration, fuzz, invariant: **105 test lulus**
   (`contracts/test/TaniTraceFunding.t.sol`, `contracts/test/Invariant.t.sol`,
   mocks fee-on-transfer).
-- [x] Frontend unit: **46 test lulus** (vitest; paritas manifest, invarians
+- [x] Frontend unit: **51 test lulus** (vitest; paritas manifest, invarians
   hash saat `advisory`, file-types, format, types, advisory normalization).
 
 Verifikasi:
@@ -105,7 +105,7 @@ cd apps/web && npx tsc --noEmit && bun run lint && bun run test && bun run build
 ## Definition of Done (PRD §18)
 
 - [x] Seluruh test Foundry lulus (105 test).
-- [x] Test frontend (46), typecheck, lint (ESLint 9 + eslint-config-next),
+- [x] Test frontend (51), typecheck, lint (ESLint 9 + eslint-config-next),
   dan `next build` lulus.
 - [x] Kontrak ter-deploy di Monad Testnet + `deployments/monadTestnet.json`.
 - [ ] Frontend terhubung wallet, membaca state, dan mengirim semua transaksi
