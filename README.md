@@ -83,7 +83,7 @@ dan keputusan akhir tetap bersumber dari smart contract Monad.
 | 📣 **Build in public** | [Posting & demo kit](docs/build-in-public-kit.md) |
 | ✅ **Hasil uji** | `forge test` **106 lulus** · Vitest **52 lulus** · `tsc`, ESLint, `next build` lulus |
 | ⛓️ **Jaringan** | Monad Testnet · chain ID `10143` · gas dibayar dalam **MON** |
-| 🪙 **Token** | TNC ("Tani Token"), 18 desimal, supply tetap 1.000.000, tanpa owner |
+| 🪙 **Token** | TNC ("Tani Token") · Contract: [`0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3`](https://testnet.monadexplorer.com/address/0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3) (18 desimal) |
 | 🧾 **Testnet saja** | TNC tidak punya nilai uang dan tidak bisa ditukar |
 
 <details>
@@ -144,6 +144,15 @@ sedikit **MON testnet** untuk gas. Tidak perlu uang sungguhan.
    klik **Hubungkan wallet**, lalu setujui perpindahan jaringan ke Monad Testnet.
    Aplikasi menolak transaksi jika wallet berada di chain lain.
 5. **Klaim TNC** di `/faucet` (100 TNC per alamat, sekali).
+
+   > 💡 **Cara Menambahkan / Import Token TNC ke MetaMask:**  
+   > Agar saldo TNC langsung muncul di wallet Anda setelah klaim:
+   > - Buka MetaMask ➔ Pilih jaringan **Monad Testnet**.
+   > - Masuk ke tab **Tokens** ➔ Klik **Import tokens**.
+   > - **Token Contract Address:** `0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3`
+   > - **Token Symbol:** `TNC`
+   > - **Token Decimal:** `18`
+   > - Klik **Next** ➔ **Import**. Saldo 100 TNC Anda akan langsung muncul di MetaMask!
 6. **Coba alurnya** (peran bisa berganti-ganti wallet):
 
    | Peran | Halaman | Yang dilakukan |
@@ -351,6 +360,14 @@ ini dengan viem (`apps/web/lib/manifest.ts`) dan membandingkannya dengan
 Deployer `0x7210716f612812374Fa2FF4cf6b3467f55ffd8fC`, blok `73746544`.
 Token: `name()` = `Tani Token`, `symbol()` = `TNC`, `totalSupply()` = 1.000.000,
 faucet `claimAmount()` = 100 TNC.
+
+#### 🪙 Parameter Import Token TNC ke Wallet (MetaMask / Rabby)
+
+| Parameter | Nilai |
+| --- | --- |
+| **Token Contract Address** | `0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3` |
+| **Token Symbol** | `TNC` |
+| **Token Decimals** | `18` |
 
 Nilai untuk `apps/web/.env.local` (hanya alamat publik, bukan rahasia):
 
