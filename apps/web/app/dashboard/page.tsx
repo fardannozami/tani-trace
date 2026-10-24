@@ -58,6 +58,8 @@ export default function Dashboard() {
   async function handleUpload() {
     setUploadError(null);
     setAdvisoryError(null);
+    setAdvisory(null);
+    setCid(null);
     if (files.length === 0) { setUploadError("Pilih berkas bukti."); return; }
     if (!purpose.trim()) { setUploadError("Isi tujuan pencairan sebelum mengunggah bukti."); return; }
     if (purpose.trim().length > 96) { setUploadError("Tujuan maksimal 96 karakter."); return; }
@@ -124,7 +126,7 @@ export default function Dashboard() {
           {!isLoading && activeCampaigns.length === 0 ? <small>Tidak ada campaign aktif yang dapat diajukan.</small> : null}
           <label>Nominal (TNC)<input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} min="0" step="0.0001" /></label>
           <label>Tujuan<input value={purpose} onChange={(e) => setPurpose(e.target.value)} /></label>
-          <label>Berkas bukti<input type="file" multiple accept="image/jpeg,image/png,application/pdf,application/json" onChange={(e) => setFiles(Array.from(e.target.files ?? []))} /></label>
+          <label>Berkas bukti<input type="file" multiple accept="image/jpeg,image/png,application/pdf,application/json" onChange={(e) => { setFiles(Array.from(e.target.files ?? [])); setCid(null); setAdvisory(null); setAdvisoryError(null); }} /></label>
           <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
             <button type="button" className="button secondary" onClick={handleUpload} disabled={uploading || actions.status === "pending"}>{uploading ? "Mengunggah..." : "1. Unggah bukti ke IPFS"}</button>
             <button type="button" className="button" onClick={handleRequest} disabled={!cid || !isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>2. Ajukan pencairan</button>

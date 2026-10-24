@@ -12,8 +12,7 @@ import { useTokenInfo } from "../../../hooks/useTokenInfo";
 import { usePublicClient } from "wagmi";
 import { FUNDING_ADDRESS, TOKEN_ADDRESS, abi, isConfigured, EXPLORER_URL } from "../../../lib/contract";
 import { formatTani, formatDate, formatAddress, parseTani, countdown } from "../../../lib/format";
-import { availableEscrow } from "../../../lib/types";
-import { CampaignStatus } from "../../../lib/types";
+import { availableEscrow, CampaignStatus, RequestStatus } from "../../../lib/types";
 import { ShareCampaignCard } from "../../../components/campaign/ShareCampaignCard";
 import { StatusBadge } from "../../../components/campaign/StatusBadge";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -231,11 +230,19 @@ export default function CampaignDetail() {
         <section style={{ marginTop: 24 }}>
           <h3>Pengajuan pencairan</h3>
           {requests.length === 0 ? <EmptyState title="Belum ada pengajuan" /> : (
-            <ul>
+            <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: 10 }}>
               {requests.map((r) => (
-                <li key={String(r.id)}>
-                  <Link href={`/campaigns/${id}/requests/${r.id}`}>Request #{String(r.id)} · {formatTani(r.amount)} TNC · {r.purpose}</Link>
-                  <StatusBadge status={r.status} domain="request" />
+                <li key={String(r.id)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", padding: 14, border: "1px solid var(--line)", borderRadius: 12 }}>
+                  <div>
+                    <Link href={`/campaigns/${id}/requests/${r.id}`}>Request #{String(r.id)} · {formatTani(r.amount)} TNC · {r.purpose}</Link>
+                    <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <StatusBadge status={r.status} domain="request" />
+                      {r.status === RequestStatus.PENDING && now !== null && now < Number(r.votingDeadline) ? <span>Investor dapat memberi suara sampai {formatDate(r.votingDeadline)}.</span> : null}
+                    </div>
+                  </div>
+                  <Link className="button secondary" href={`/campaigns/${id}/requests/${r.id}`}>
+                    {r.status === RequestStatus.PENDING ? "Buka voting" : "Lihat detail"}
+                  </Link>
                 </li>
               ))}
             </ul>
