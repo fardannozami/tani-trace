@@ -113,7 +113,8 @@ sedikit **MON testnet** untuk gas. Tidak perlu uang sungguhan.
 3. **Ambil MON gratis** di [faucet resmi Monad](https://faucet.monad.xyz)
    (butuh login sosial/alamat wallet; ada syarat saldo di beberapa faucet —
    lihat [dokumentasi faucet](https://docs.monad.xyz/developer-essentials/faucet)).
-   0,05 MON sudah cukup untuk puluhan transaksi testnet.
+   **Deploy butuh sekitar 1–2 MON** (3 kontrak, ~5,3 juta gas); satu transaksi
+   biasa sesudahnya hanya ~0,01 MON.
 4. **Buka aplikasi** `http://localhost:3000` (atau URL demo yang diberikan),
    klik **Hubungkan wallet**, lalu setujui perpindahan jaringan ke Monad Testnet.
    Aplikasi menolak transaksi jika wallet berada di chain lain.
@@ -347,10 +348,15 @@ cd apps/web && bun install && cd ../..
 ### 3. Isi environment
 
 ```bash
-cp .env.example contracts/.env
-cp apps/web/.env.example apps/web/.env.local
+# hanya membuat jika belum ada, supaya isian lama tidak tertimpa
+[ -f contracts/.env ] || cp .env.example contracts/.env
+[ -f apps/web/.env.local ] || cp apps/web/.env.example apps/web/.env.local
 ```
 
+Kalau `contracts/.env` sudah ada tapi deploy bilang
+`environment variable MONAD_TESTNET_RPC not found`, berarti perintah di atas
+dijalankan dari folder yang salah atau file-nya belum dibuat — pastikan file itu
+ada **di dalam** `contracts/`.
 **`contracts/.env`** (dipakai Foundry):
 
 | Variabel | Wajib | Arti |
@@ -383,7 +389,10 @@ cp apps/web/.env.example apps/web/.env.local
 ### 4. Deploy kontrak ke Monad Testnet
 
 Butuh MON testnet di wallet deployer (lihat
-[Coba sekarang](#-coba-sekarang) langkah 3).
+[Coba sekarang](#-coba-sekarang) langkah 3). `contracts/.env` **harus ada** dan
+berisi `PRIVATE_KEY` (64 karakter hex, boleh dengan atau tanpa awalan `0x`).
+Foundry hanya memuat `.env` dari folder tempat `forge` dijalankan, yaitu
+`contracts/`.
 
 ```bash
 cd contracts
@@ -530,6 +539,8 @@ deployments/ hasil deploy (dibuat otomatis; belum ada sampai deploy dijalankan)
 | `RATE_LIMITED` | Batas advisory 6 panggilan / 10 menit per alamat. |
 | Data tidak termuat / `getLogs` error | RPC publik membatasi rentang blok. Isi `NEXT_PUBLIC_DEPLOY_BLOCK`. |
 | Perubahan `.env` tidak berpengaruh | Env dibaca saat startup — hentikan dan jalankan ulang dev server. |
+| `environment variable MONAD_TESTNET_RPC not found` | `contracts/.env` belum ada. Dari root repo: `cp .env.example contracts/.env`, isi `PRIVATE_KEY`, lalu jalankan `forge` dari folder `contracts/`. |
+| `PRIVATE_KEY kosong` saat deploy | Buka `contracts/.env`, isi `PRIVATE_KEY=0x...` (private key wallet testnet, jangan yang berisi dana asli). |
 | Transaksi revert | Cek status campaign/pengajuan, allowance TNC, dan escrow tersedia. Tidak ada retry otomatis. |
 | "Manifest tidak cocok" | Field `(campaignId, requestId, farmer, amount, purpose, evidenceCid, requestedAt)` harus identik dengan yang on-chain. |
 | Build gagal `@x402/*` | Dependensi opsional wagmi belum terpasang: `cd apps/web && bun install`. |

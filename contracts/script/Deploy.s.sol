@@ -8,7 +8,12 @@ import {TaniTraceFunding} from "../src/TaniTraceFunding.sol";
 
 contract Deploy is Script {
     function run() external returns (TANIToken token, TANIFaucet faucet, TaniTraceFunding funding) {
-        uint256 key = vm.envUint("PRIVATE_KEY");
+        string memory rawKey = vm.envOr("PRIVATE_KEY", string(""));
+        require(bytes(rawKey).length != 0, "PRIVATE_KEY kosong: isi contracts/.env (lihat .env.example)");
+        if (bytes(rawKey).length == 64) {
+            rawKey = string.concat("0x", rawKey);
+        }
+        uint256 key = vm.parseUint(rawKey);
         uint256 allocation = vm.envOr("FAUCET_ALLOCATION", uint256(200_000));
         uint256 claimAmount = vm.envOr("FAUCET_CLAIM_AMOUNT", uint256(100));
         address deployer = vm.addr(key);
