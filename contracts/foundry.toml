@@ -16,5 +16,3 @@ fs_permissions = [
 [rpc_endpoints]
 monad_testnet = "${MONAD_TESTNET_RPC}"
 
-[etherscan]
-monad_testnet = { key = "", url = "https://sourcify-api-monad.blockvision.org/" }

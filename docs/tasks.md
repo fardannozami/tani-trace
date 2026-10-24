@@ -88,12 +88,11 @@ cd apps/web && npx tsc --noEmit && bun run lint && bun run test && bun run build
 
 - [x] Deploy script `contracts/script/Deploy.s.sol` + `setup.sh` +
   `.env.example` (root dan `apps/web`).
-- [ ] Deploy ke Monad Testnet (butuh `PRIVATE_KEY`) dan
-  `deployments/monadTestnet.json` (token/funding/faucet, deployer,
-  `deployedAtBlock`).
-- [ ] `apps/web/.env.local` berisi RPC, tiga alamat, `NEXT_PUBLIC_DEPLOY_BLOCK`,
+- [x] Deploy ke Monad Testnet dan `deployments/monadTestnet.json`
+  (token/funding/faucet, deployer, `deployedAtBlock` = `73725698`).
+- [x] `apps/web/.env.local` berisi RPC, tiga alamat, `NEXT_PUBLIC_DEPLOY_BLOCK`,
   gateway IPFS, `PINATA_JWT`, `UPLOAD_SIGNING_SECRET`, opsional
-  `GEMINI_API_KEY`; Next.js di-restart setelah pengisian.
+  `GEMINI_API_KEY`; Next.js perlu di-restart setelah pengisian.
 
 ## Dokumentasi
 
@@ -108,11 +107,11 @@ cd apps/web && npx tsc --noEmit && bun run lint && bun run test && bun run build
 - [x] Seluruh test Foundry lulus (95 test).
 - [x] Test frontend (35), typecheck, lint (ESLint 9 + eslint-config-next),
   dan `next build` lulus.
-- [ ] Kontrak ter-deploy di Monad Testnet + `deployments/monadTestnet.json`
-  (butuh private key pengguna).
+- [x] Kontrak ter-deploy di Monad Testnet + `deployments/monadTestnet.json`.
 - [ ] Frontend terhubung wallet, membaca state, dan mengirim semua transaksi
-  (siap diuji setelah env diisi).
-- [ ] Upload + verifikasi hash manifest IPFS berjalan (butuh `PINATA_JWT`).
+  (env sudah terisi; tinggal uji manual E2E).
+- [ ] Upload + verifikasi hash manifest IPFS berjalan (`PINATA_JWT` sudah terisi;
+  tinggal uji manual E2E).
 - [ ] Advisory AI opsional tidak memblokir tanpa `GEMINI_API_KEY` (kode
   siap; butuh key untuk uji nyata).
 - [ ] Alur campaign → voting → pencairan → refund → audit didemo end-to-end

@@ -48,14 +48,16 @@ sehingga field pengajuan tidak bisa diubah diam-diam. Pemeriksaan awal berbasis
 **AI (Gemini)** hanya bersifat *advisory*: hasilnya tidak pernah menjadi keputusan
 on-chain dan tidak pernah memblokir transaksi.
 
-> **Status repo:** semua fitur, test, dan build lulus. Kontrak **belum
-> di-deploy ke Monad Testnet** oleh maintainer, jadi belum ada alamat publik yang
-> bisa dibagikan. Cara mencobanya sekarang ada di bagian
-> [Coba sekarang](#-coba-sekarang).
+> **Status:** kontrak **sudah live di Monad Testnet** (alamat di
+> [bawah](#alamat-kontrak), tercatat di
+> [`deployments/monadTestnet.json`](deployments/monadTestnet.json)). Frontend
+> belum di-hosting — jalankan lokal lalu isi alamat kontrak ke `.env.local`.
+> Semua test dan build lulus.
 
 | | |
 | --- | --- |
 | 🌐 **Aplikasi** | Jalankan lokal: `http://localhost:3000` (lihat [panduan](#-menjalankan-di-lokal-langkah-demi-langkah)) |
+| 🔗 **Deploy** | Monad Testnet, blok `73725698` · [deployments/monadTestnet.json](deployments/monadTestnet.json) |
 | 📜 **Kontrak** | `contracts/src/` — `TANIToken`, `TANIFaucet`, `TaniTraceFunding` |
 | ✅ **Hasil uji** | `forge test` **95 lulus** · Vitest **35 lulus** · `tsc`, ESLint, `next build` lulus |
 | ⛓️ **Jaringan** | Monad Testnet · chain ID `10143` · gas dibayar dalam **MON** |
@@ -83,7 +85,8 @@ optional Gemini-based pre-check is advisory only: it is stored inside the IPFS
 manifest, excluded from the hash, and never blocks uploads, transactions, or
 on-chain logic. There is no admin, no pause, no upgrade path, and no permanent
 backend or database. Tests: 95 Foundry (unit, fuzz, invariant) and 35 frontend
-(Vitest). Contracts are **not yet deployed to Monad Testnet** by the maintainer.
+(Vitest). The contracts are deployed on Monad Testnet (see
+`deployments/monadTestnet.json`); the frontend is not hosted yet and runs locally.
 </details>
 
 ## 🚀 Coba sekarang
@@ -91,12 +94,12 @@ backend or database. Tests: 95 Foundry (unit, fuzz, invariant) and 35 frontend
 Yang perlu disiapkan: browser + wallet (MetaMask atau wallet EIP-1193 lain) dan
 sedikit **MON testnet** untuk gas. Tidak perlu uang sungguhan.
 
-> **Penting:** karena kontrak belum dideploy oleh maintainer, langkah paling
-> singkat untuk melihat aplikasi berjalan adalah menjalankannya di laptop sendiri
-> (5–10 menit, tanpa perlu wallet). Buka
-> [Menjalankan di lokal](#-menjalankan-di-lokal-langkah-demi-langkah).
+> **Penting:** kontraknya sudah dideploy, tetapi frontend belum di-hosting. Jadi
+> caranya: jalankan frontend di laptop (5–10 menit), lalu isi alamat kontrak dari
+> [`deployments/monadTestnet.json`](deployments/monadTestnet.json) ke
+> `apps/web/.env.local`. Panduan: [Menjalankan di lokal](#-menjalankan-di-lokal-langkah-demi-langkah).
 
-### Kalau kontrak sudah dideploy (mis. oleh penyelenggara demo)
+### Langkah mencoba
 
 1. **Siapkan wallet.** Install [MetaMask](https://metamask.io/download/) (atau
    wallet lain yang mendukung jaringan EVM kustom).
@@ -306,19 +309,31 @@ ini dengan viem (`apps/web/lib/manifest.ts`) dan membandingkannya dengan
 
 ### Alamat kontrak
 
-**Monad Testnet (chain 10143)** — belum di-deploy oleh maintainer. Setelah deploy,
-script menulis [`deployments/monadTestnet.json`](deployments/monadTestnet.json)
-(otomatis dibuat):
+**Monad Testnet (chain 10143)** — sudah dideploy. Sumber kebenaran:
+[`deployments/monadTestnet.json`](deployments/monadTestnet.json).
 
-| Kontrak | Alamat |
-| --- | --- |
-| TANIToken (TNC) | `—` (menyusul setelah deploy) |
-| TaniTraceFunding | `—` |
-| TANIFaucet | `—` |
-| Deployer / `deployedAtBlock` | `—` |
+| Kontrak | Alamat | Explorer |
+| --- | --- | --- |
+| TANIToken (TNC) | `0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3` | [lihat](https://testnet.monadexplorer.com/address/0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3) |
+| TaniTraceFunding | `0xE4b10b2b7185042F671Aee32aa3E941544A8675d` | [lihat](https://testnet.monadexplorer.com/address/0xE4b10b2b7185042F671Aee32aa3E941544A8675d) |
+| TANIFaucet | `0xBF28435F8654ece0A0C37a3476b682dFd596Eb52` | [lihat](https://testnet.monadexplorer.com/address/0xBF28435F8654ece0A0C37a3476b682dFd596Eb52) |
 
-Setelah file itu ada, salin nilainya ke `apps/web/.env.local` (lihat tabel
-environment di bawah), lalu restart dev server.
+Deployer `0x7210716f612812374Fa2FF4cf6b3467f55ffd8fC`, blok `73725698`.
+Token: `name()` = `Tani Token`, `symbol()` = `TNC`, `totalSupply()` = 1.000.000,
+faucet `claimAmount()` = 100 TNC.
+
+Nilai untuk `apps/web/.env.local` (hanya alamat publik, bukan rahasia):
+
+```env
+NEXT_PUBLIC_TOKEN_ADDRESS=0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3
+NEXT_PUBLIC_FUNDING_ADDRESS=0xE4b10b2b7185042F671Aee32aa3E941544A8675d
+NEXT_PUBLIC_FAUCET_ADDRESS=0xBF28435F8654ece0A0C37a3476b682dFd596Eb52
+NEXT_PUBLIC_DEPLOY_BLOCK=73725698
+```
+
+Source code belum diverifikasi di explorer; verifikasi opsional (lihat langkah 4
+di bawah) tidak memengaruhi penggunaan aplikasi. Jika Anda mendeploy ulang,
+ganti semua nilai di atas dengan hasil `deployments/monadTestnet.json` yang baru.
 
 ## 💻 Menjalankan di lokal (langkah demi langkah)
 
@@ -451,8 +466,10 @@ NEXT_PUBLIC_FAUCET_ADDRESS=0x...
 NEXT_PUBLIC_DEPLOY_BLOCK=12345678
 ```
 
-Verifikasi source (opsional, konfigurasi Sourcify Monad sudah ada di
-`foundry.toml`):
+Verifikasi source (opsional). Endpoint Sourcify Monad harus diberikan eksplisit;
+entri `[etherscan]` sengaja tidak dipakai karena URL Sourcify bukan API
+Etherscan-compatible (dulu memunculkan `ERROR etherscan: ... Cannot GET /` di
+setiap deploy, padahal deploy tetap berhasil):
 
 ```bash
 forge verify-contract <ALAMAT> src/TaniTraceFunding.sol:TaniTraceFunding \
@@ -588,8 +605,9 @@ deployments/ hasil deploy (dibuat otomatis; belum ada sampai deploy dijalankan)
 
 ## 📝 Catatan jujur
 
-- **Belum di-deploy** ke Monad Testnet oleh maintainer; belum ada alamat publik,
-  demo live, atau screenshot. Bagian alamat akan diisi setelah deploy pertama.
+- **Sudah dideploy, tapi belum di-hosting.** Kontrak live di Monad Testnet;
+  frontend dijalankan lokal. Belum ada URL demo publik atau screenshot.
+- **Source belum diverifikasi** di explorer (opsional, tidak memengaruhi alur).
 - **TNC adalah token simulasi** tanpa nilai uang; gas dibayar dalam MON testnet.
 - **Tidak ada resistensi Sybil.** Faucet satu klaim per alamat bukan perlindungan
   produksi; wallet bisa dibuat banyak.
