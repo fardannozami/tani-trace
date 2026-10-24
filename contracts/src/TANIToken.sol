@@ -23,6 +23,10 @@ contract TANIToken is ReentrancyGuard {
     uint256 public constant FAUCET_CLAIM_AMOUNT = 100 ether;
     uint256 public constant FAUCET_ALLOCATION = 200_000 ether;
 
+    function claimAmount() external pure returns (uint256) {
+        return FAUCET_CLAIM_AMOUNT;
+    }
+
     event Claimed(address indexed account, uint256 amount);
 
     error AlreadyClaimed();

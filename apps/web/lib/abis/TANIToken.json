@@ -422,6 +422,21 @@
     },
     {
         "type":  "function",
+        "name":  "claimAmount",
+        "inputs":  [
+
+                   ],
+        "outputs":  [
+                        {
+                            "name":  "",
+                            "type":  "uint256",
+                            "internalType":  "uint256"
+                        }
+                    ],
+        "stateMutability":  "pure"
+    },
+    {
+        "type":  "function",
         "name":  "claimRefund",
         "inputs":  [
                        {

@@ -47,6 +47,7 @@ contract TANITokenTest is Test {
         assertEq(token.balanceOf(deployer), 800_000 ether - 20_000 ether);
         assertEq(token.balanceOf(address(token)), 200_000 ether);
         assertEq(token.faucetRemaining(), 200_000 ether);
+        assertEq(token.claimAmount(), 100 ether);
         assertEq(token.totalEscrowed(), 0);
     }
 
