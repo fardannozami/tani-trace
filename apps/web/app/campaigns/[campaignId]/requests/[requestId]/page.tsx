@@ -1,0 +1,2 @@
+import { Navigation } from "../../../../../components/Navigation";
+export default async function RequestDetail({ params }: { params: Promise<{ campaignId: string; requestId: string }> }) { const { campaignId, requestId } = await params; return <><Navigation /><main className="page"><div className="eyebrow">Campaign #{campaignId} · Request #{requestId}</div><h1>Request pencairan</h1><div className="notice">Halaman ini akan menampilkan manifest hash, CID bukti, status voting, dan aksi vote/finalize/pay.</div></main></>; }

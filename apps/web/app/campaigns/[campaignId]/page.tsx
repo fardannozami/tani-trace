@@ -1,0 +1,2 @@
+import { Navigation } from "../../../components/Navigation";
+export default async function CampaignDetail({ params }: { params: Promise<{ campaignId: string }> }) { const { campaignId } = await params; return <><Navigation /><main className="page"><div className="eyebrow">Campaign #{campaignId}</div><h1>Detail campaign</h1><div className="notice">Detail akan membaca state campaign, contributor, escrow, dan request dari contract `TaniTraceFunding`.</div></main></>; }

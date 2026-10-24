@@ -1,0 +1,2 @@
+import { Navigation } from "../../../components/Navigation";
+export default function NewCampaign() { return <><Navigation /><main className="page"><div className="eyebrow">Farmer workspace</div><h1>Buat campaign baru</h1><div className="notice">Form campaign on-chain siap dihubungkan ke <code>createCampaign</code>. Batas field mengikuti PRD: judul 96, tanaman 48, lokasi 120, rencana 600 karakter.</div></main></>; }
