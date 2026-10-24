@@ -1,194 +1,580 @@
-# TaniTrace
+<div align="center">
 
-Protokol pendanaan pertanian transparan di **Monad Testnet** (chain ID `10143`).
-Petani membuat campaign, investor menyetor token **TNC** (simulasi), dan setiap
-pencairan dana harus lolos voting investor secara on-chain.
+# 🌾 TaniTrace
 
-Smart contract adalah satu-satunya sumber kebenaran. Frontend Next.js hanya
-membaca state/event dan menjadi adapter upload IPFS — tidak ada backend
-permanen atau database.
+<h3>Pendanaan pertanian transparan: petani mengajukan dana, investor yang menyetujui setiap pencairan lewat voting on-chain.</h3>
 
-**Status verifikasi:** `forge test` 95 test lulus · frontend 35 test lulus ·
-`tsc`, ESLint, dan `next build` lulus.
+<p>
+<a href="https://github.com/fardannozami/tani-trace"><img src="https://img.shields.io/badge/repo-GitHub-0b1d15?style=for-the-badge&logo=github" alt="Repo GitHub"></a>
+<a href="https://docs.monad.xyz/developer-essentials/testnet"><img src="https://img.shields.io/badge/Monad-Testnet%20%C2%B7%2010143-836EF9?style=for-the-badge" alt="Monad Testnet"></a>
+<img src="https://img.shields.io/badge/Foundry-95%20test-1B1B1B?style=for-the-badge" alt="95 Foundry tests">
+<img src="https://img.shields.io/badge/Frontend-35%20test-2c6a48?style=for-the-badge" alt="35 frontend tests">
+</p>
 
-## Fitur
+<p>
+<img src="https://img.shields.io/badge/Solidity-0.8.28-363636?logo=solidity&logoColor=white" alt="Solidity">
+<img src="https://img.shields.io/badge/OpenZeppelin-v5-4E5EE4?logo=openzeppelin&logoColor=white" alt="OpenZeppelin">
+<img src="https://img.shields.io/badge/Foundry-forge-1B1B1B" alt="Foundry">
+<img src="https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white" alt="Next.js 15">
+<img src="https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white" alt="React 19">
+<img src="https://img.shields.io/badge/wagmi%20%C2%B7%20viem-v2-1C1C1C" alt="wagmi viem">
+<img src="https://img.shields.io/badge/Gemini-Vision-8E75B2?logo=googlegemini&logoColor=white" alt="Gemini">
+<img src="https://img.shields.io/badge/IPFS-Pinata-65C2CB?logo=ipfs&logoColor=white" alt="IPFS Pinata">
+</p>
 
-- **Campaign** — target pendanaan, deadline, status `FUNDING → ACTIVE/FAILED →
-  COMPLETED`, aktivasi otomatis saat target tercapai.
-- **Kontribusi** — token ERC-20 TNC dengan allowance; transfer yang memotong fee
-  (fee-on-transfer) ditolak agar akuntansi escrow tetap 1:1.
-- **Pengajuan pencairan** — nominal, tujuan, CID bukti IPFS, `manifestHash`
-  on-chain; satu pengajuan aktif dan satu `APPROVED` belum dibayar per campaign.
-- **Voting 24 jam** — bobot = kontribusi tercatat (bukan saldo wallet), kuorum
-  50% dibulatkan ke atas, YES harus lebih besar dari NO. Finalisasi
-  permissionless; hasil `APPROVED`/`REJECTED`/`EXPIRED`.
-- **Pencairan satu kali** — hanya petani pemilik pengajuan, nominal persis yang
-  disetujui; `releasedTotal` mencakup refund.
-- **Refund** — campaign `FAILED`, satu klaim per wallet, transisi malas saat
-  `claimRefund`.
-- **Bukti IPFS** — upload via Pinata dengan otorisasi nonce + EIP-191 + HMAC;
-  batas 4 MB/file dan 8 MB/bundel; verifikasi ulang `manifestHash` di frontend.
-- **Advisory AI (opsional)** — pemeriksaan awal berkas via Gemini. Hasilnya
-  masuk manifest IPFS, **tidak** on-chain, tidak ikut `manifestHash`, dan tidak
-  pernah memblokir upload/transaksi.
-- **Audit feed** — `/audit` merekonstruksi 10 event on-chain dengan rentang blok
-  terbatas dan tautan explorer.
-- Tanpa owner, admin, pause, atau upgrade path.
+<b><a href="#-coba-sekarang">Coba sekarang</a></b> ·
+<a href="#-masalah--solusi">Masalah &amp; solusi</a> ·
+<a href="#%EF%B8%8F-arsitektur">Arsitektur</a> ·
+<a href="#-smart-contract">Kontrak</a> ·
+<a href="#-menjalankan-di-lokal-langkah-demi-langkah">Jalankan lokal</a> ·
+<a href="#-skenario-demo">Demo</a> ·
+<a href="#-test">Test</a>
 
-## Stack
+<sub>Monad Blitz · Monad Testnet (chain ID 10143) · token simulasi TNC tanpa nilai uang</sub>
+
+</div>
+
+---
+
+TaniTrace adalah protokol pendanaan pertanian di **Monad Testnet**. Petani membuat
+campaign dengan target dan tenggat; investor menyetor token simulasi **TNC**;
+dana dikunci di smart contract (escrow). Saat petani butuh dana untuk benih,
+pupuk, atau tenaga kerja, ia mengajukan pencairan. **Investor campaign itulah yang
+memutuskan** lewat voting 24 jam — bukan admin. Jika disetujui, contract
+mentransfer dana tepat sebesar nominal yang disetujui, satu kali.
+
+Foto dan nota bukti disimpan di **IPFS**; hash manifest-nya dicatat on-chain
+sehingga field pengajuan tidak bisa diubah diam-diam. Pemeriksaan awal berbasis
+**AI (Gemini)** hanya bersifat *advisory*: hasilnya tidak pernah menjadi keputusan
+on-chain dan tidak pernah memblokir transaksi.
+
+> **Status repo:** semua fitur, test, dan build lulus. Kontrak **belum
+> di-deploy ke Monad Testnet** oleh maintainer, jadi belum ada alamat publik yang
+> bisa dibagikan. Cara mencobanya sekarang ada di bagian
+> [Coba sekarang](#-coba-sekarang).
+
+| | |
+| --- | --- |
+| 🌐 **Aplikasi** | Jalankan lokal: `http://localhost:3000` (lihat [panduan](#-menjalankan-di-lokal-langkah-demi-langkah)) |
+| 📜 **Kontrak** | `contracts/src/` — `TANIToken`, `TANIFaucet`, `TaniTraceFunding` |
+| ✅ **Hasil uji** | `forge test` **95 lulus** · Vitest **35 lulus** · `tsc`, ESLint, `next build` lulus |
+| ⛓️ **Jaringan** | Monad Testnet · chain ID `10143` · gas dibayar dalam **MON** |
+| 🪙 **Token** | TNC ("Tani Token"), 18 desimal, supply tetap 1.000.000, tanpa owner |
+| 🧾 **Testnet saja** | TNC tidak punya nilai uang dan tidak bisa ditukar |
+
+<details>
+<summary><b>English summary</b></summary>
+
+TaniTrace is a transparent agricultural funding protocol on Monad Testnet
+(chain ID 10143). A farmer creates a campaign with a target and a deadline.
+Investors fund it with a simulated ERC-20 token, **TNC**, held in the funding
+contract escrow. When the farmer needs money during the growing season, they
+submit a disbursement request (amount, purpose, IPFS evidence CID). The contract
+records a canonical `manifestHash`, opens a 24-hour vote, and only contributing
+investors may vote, weighted by their recorded contribution (not their current
+wallet balance). A request passes only if quorum — 50% of `totalRaised`, rounded
+up — is met and YES weight exceeds NO. Anyone can finalize after the deadline
+(`APPROVED` / `REJECTED` / `EXPIRED`), and only the farmer can pay an approved
+request, exactly once. Failed campaigns (`FAILED`) allow one refund per
+contributor. Evidence files are pinned to IPFS through a server-side Pinata
+adapter authorised with a nonce, an EIP-191 signature and an HMAC token; the
+frontend recomputes the manifest hash and compares it with the on-chain value. An
+optional Gemini-based pre-check is advisory only: it is stored inside the IPFS
+manifest, excluded from the hash, and never blocks uploads, transactions, or
+on-chain logic. There is no admin, no pause, no upgrade path, and no permanent
+backend or database. Tests: 95 Foundry (unit, fuzz, invariant) and 35 frontend
+(Vitest). Contracts are **not yet deployed to Monad Testnet** by the maintainer.
+</details>
+
+## 🚀 Coba sekarang
+
+Yang perlu disiapkan: browser + wallet (MetaMask atau wallet EIP-1193 lain) dan
+sedikit **MON testnet** untuk gas. Tidak perlu uang sungguhan.
+
+> **Penting:** karena kontrak belum dideploy oleh maintainer, langkah paling
+> singkat untuk melihat aplikasi berjalan adalah menjalankannya di laptop sendiri
+> (5–10 menit, tanpa perlu wallet). Buka
+> [Menjalankan di lokal](#-menjalankan-di-lokal-langkah-demi-langkah).
+
+### Kalau kontrak sudah dideploy (mis. oleh penyelenggara demo)
+
+1. **Siapkan wallet.** Install [MetaMask](https://metamask.io/download/) (atau
+   wallet lain yang mendukung jaringan EVM kustom).
+2. **Tambahkan jaringan Monad Testnet** di wallet:
+
+   | Isian | Nilai |
+   | --- | --- |
+   | Nama jaringan | Monad Testnet |
+   | RPC URL | `https://testnet-rpc.monad.xyz` |
+   | Chain ID | `10143` |
+   | Simbol mata uang | `MON` |
+   | Block explorer | `https://testnet.monadexplorer.com` |
+
+3. **Ambil MON gratis** di [faucet resmi Monad](https://faucet.monad.xyz)
+   (butuh login sosial/alamat wallet; ada syarat saldo di beberapa faucet —
+   lihat [dokumentasi faucet](https://docs.monad.xyz/developer-essentials/faucet)).
+   0,05 MON sudah cukup untuk puluhan transaksi testnet.
+4. **Buka aplikasi** `http://localhost:3000` (atau URL demo yang diberikan),
+   klik **Hubungkan wallet**, lalu setujui perpindahan jaringan ke Monad Testnet.
+   Aplikasi menolak transaksi jika wallet berada di chain lain.
+5. **Klaim TNC** di `/faucet` (100 TNC per alamat, sekali).
+6. **Coba alurnya** (peran bisa berganti-ganti wallet):
+
+   | Peran | Halaman | Yang dilakukan |
+   | --- | --- | --- |
+   | Investor | `/faucet` → `/campaigns/[id]` | klaim TNC, approve allowance, kontribusi |
+   | Petani | `/campaigns/new` | buat campaign (target + deadline) |
+   | Petani | `/dashboard` | unggah bukti ke IPFS, ajukan pencairan |
+   | Investor | `/campaigns/[id]/requests/[requestId]` | cek hash manifest, vote YES/NO |
+   | Siapa pun | halaman request | `finalizeRequest` setelah 24 jam |
+   | Petani | halaman request | `payDisbursement` jika `APPROVED` |
+   | Petani | `/dashboard` | `completeCampaign` setelah kewajiban selesai |
+   | Semua | `/audit` | lihat seluruh event on-chain + tautan explorer |
+   | Kontributor | `/refund` | refund jika campaign `FAILED` |
+
+7. **Voting 24 jam terasa lama saat demo.** Untuk demo, jalankan chain lokal
+   (Anvil) dan majukan waktu: `cast rpc evm_increaseTime 86401` lalu
+   `cast rpc evm_mine`.
+
+## 🌾 Masalah & solusi
+
+Petani kecil sering butuh modal di tengah masa tanam, tetapi pemberi dana sulit
+melihat: berapa dana terkumpul, untuk apa uang diminta, siapa yang setuju, kapan
+dana cair, dan bukti apa yang mendasarinya. Ketergantungan pada satu pihak yang
+memegang uang juga membuat pencairan tidak transparan.
+
+TaniTrace memindahkan aturan itu ke smart contract:
+
+- **Escrow, bukan titipan pribadi.** Dana kontribusi terkunci di contract.
+  Tidak ada admin yang bisa menariknya; sisa escrow yang tidak pernah diajukan
+  tetap di contract dan tidak bisa diambil sepihak.
+- **Pencairan harus disetujui investor.** Setiap pengajuan membuka voting 24 jam.
+  Bobot suara = kontribusi tercatat (bukan saldo wallet saat ini), satu alamat
+  satu suara per pengajuan. Kuorum 50% dibulatkan ke atas; YES harus lebih besar
+  dari NO.
+- **Bukti tidak bisa diubah diam-diam.** `manifestHash` on-chain adalah komitmen
+  terhadap `(campaignId, requestId, farmer, amount, purpose, evidenceCid,
+  requestedAt)`. Frontend menghitung ulang hash-nya dan membandingkan dengan nilai
+  on-chain — jika ada yang diubah, verifikasi gagal.
+- **AI hanya membantu, tidak memutuskan.** Pemeriksaan awal Gemini memberi catatan
+  (mis. "foto tidak cocok dengan tujuan") tanpa memblokir apa pun. Keputusan tetap
+  di voting investor dan contract.
+- **Kegagalan ditangani jelas.** Target tidak tercapai → campaign `FAILED` →
+  refund satu kali per kontributor. Pengajuan tanpa kuorum → `EXPIRED`. YES tidak
+  lebih besar dari NO → `REJECTED`.
+- **Semua bisa diaudit.** 10 event on-chain (`CampaignCreated`,
+  `ContributionMade`, `CampaignActivated`, `CampaignFailed`,
+  `DisbursementRequested`, `VoteCast`, `RequestFinalized`, `DisbursementPaid`,
+  `RefundClaimed`, `CampaignCompleted`) tampil di `/audit` dengan tautan
+  transaksi.
+
+Contoh angka (satuan TNC, sama seperti di test):
+
+| Kejadian | Nilai |
+| --- | --- |
+| Target campaign | 1.000 TNC |
+| Investor A / B | 600 / 400 TNC (bobot suara sama dengan kontribusi) |
+| Pengajuan benih | 300 TNC → `PENDING` (voting 24 jam) |
+| Suara | A YES 600, B NO 400 → kuorum 500 tercapai, YES > NO → `APPROVED` |
+| Pencairan | petani menerima tepat 300 TNC; `releasedTotal` = 300 |
+| Escrow tersisa | 700 TNC (bisa diajukan lagi atau tetap di contract) |
+
+## 🏗️ Arsitektur
+
+Tidak ada database dan tidak ada server yang menyimpan data bisnis:
+
+- **Smart contract** menyimpan status, kontribusi, suara, hash, dan dana.
+- **IPFS (Pinata)** menyimpan berkas bukti dan manifest JSON.
+- **Next.js** hanya membaca state/event lewat RPC dan menjadi adapter upload.
+- **Route API serverless** bersifat stateless: memberi nonce, memverifikasi tanda
+  tangan wallet (EIP-191) + token HMAC, meneruskan file ke Pinata, dan (opsional)
+  memanggil Gemini.
+
+```mermaid
+flowchart LR
+  subgraph Browser["apps/web — Next.js (browser)"]
+    UI["9 halaman<br/>campaign · dashboard · audit · refund · faucet"]
+    HOOK["hooks: useContractTx<br/>baca state/event via viem"]
+  end
+
+  subgraph Server["Route API serverless (stateless)"]
+    UP["/api/upload/nonce<br/>/api/upload<br/>/api/upload/manifest"]
+    AI["/api/evidence/advisory<br/>(Gemini, opsional)"]
+  end
+
+  subgraph Monad["Monad Testnet — chain 10143"]
+    T["TANIToken (TNC)"]
+    F["TaniTraceFunding<br/>escrow + voting + pencairan"]
+    FA["TANIFaucet<br/>100 TNC sekali per alamat"]
+  end
+
+  IPFS[("IPFS / Pinata<br/>foto, nota, manifest JSON")]
+  GEM["Gemini Vision"]
+
+  UI -- "baca/tulis (wallet)" --> F
+  UI --> HOOK --> F
+  UI -- "klaim" --> FA
+  FA --> T
+  F --> T
+  UI -- "upload bukti" --> UP --> IPFS
+  UP --> AI --> GEM
+  AI --> IPFS
+```
 
 | Bagian | Teknologi |
-|---|---|
-| Kontrak | Solidity `^0.8.28`, Foundry, OpenZeppelin (ERC20, SafeERC20, ReentrancyGuard) |
-| Frontend | Next.js 15 (App Router), React 19, TypeScript, wagmi v2, viem, TanStack Query |
-| Bukti | IPFS via Pinata, manifest JSON kanonis |
-| AI | Gemini (`gemini-2.5-flash`, opsional) |
+| --- | --- |
+| Kontrak | Solidity `0.8.28`, Foundry, OpenZeppelin v5 (`ERC20`, `SafeERC20`, `ReentrancyGuard`) |
+| Web | Next.js 15 (App Router), React 19, TypeScript, wagmi v2, viem, TanStack Query, CSS di `globals.css` |
+| Bukti | IPFS via Pinata; manifest JSON kanonis |
+| AI | Gemini (default `gemini-2.5-flash`, opsional) |
 | Test | Foundry (unit/fuzz/invariant), Vitest |
 
-## Struktur
+### Alur data
+
+1. Petani `createCampaign` → status `FUNDING`.
+2. Investor `contribute` (setelah approve allowance) sebelum deadline; ketika
+   `totalRaised == targetAmount`, campaign otomatis menjadi `ACTIVE` dan
+   kontribusi ditutup.
+3. Deadline lewat di bawah target → `FAILED` (via `finalizeCampaign` atau
+   transisi malas di `claimRefund`) → kontributor refund.
+4. Petani upload bukti ke IPFS → `requestDisbursement` → status `PENDING`,
+   voting 24 jam, `manifestHash` dihitung on-chain.
+5. Investor `vote(requestId, support)`; bobot = kontribusi tercatat.
+6. Siapa pun `finalizeRequest` setelah deadline →
+   `APPROVED` / `REJECTED` / `EXPIRED`.
+7. Jika `APPROVED`, petani `payDisbursement` → `PAID` (sekali).
+8. Petani `completeCampaign` setelah tidak ada pengajuan aktif maupun
+   `APPROVED` yang belum dibayar → `COMPLETED`.
+
+## 📜 Smart contract
+
+Semua kontrak ada di [`contracts/src/`](contracts/src).
+
+| Kontrak | Fungsi |
+| --- | --- |
+| `TANIToken` | ERC-20 "Tani Token" simbol **TNC**, 18 desimal, supply tetap 1.000.000, dicetak sekali ke deployer, tanpa mint publik/owner/admin/pause |
+| `TANIFaucet` | Saldo TNC pra-isi, satu klaim per alamat, `claimAmount` immutable (default 100 TNC) |
+| `TaniTraceFunding` | Campaign, kontribusi ERC-20, pengajuan, voting 24 jam, finalisasi permissionless, pencairan satu kali, refund, penutupan campaign, view ber-paginasi |
+
+Fungsi tulis: `createCampaign`, `contribute`, `finalizeCampaign`,
+`requestDisbursement`, `vote`, `finalizeRequest`, `payDisbursement`,
+`claimRefund`, `completeCampaign`.
+
+Fungsi baca: `getCampaign`, `getRequest`, `getVote`, `availableEscrow`,
+`computeManifestHash`, `getCampaignIds`, `getContributors`,
+`getCampaignRequestIds` (`offset`/`limit`, maks **100** per halaman).
+
+| Konstanta | Nilai |
+| --- | --- |
+| `VOTING_PERIOD` | 24 jam |
+| `QUORUM_BPS` / `BPS_DENOMINATOR` | 5.000 / 10.000 (50%) |
+| `MAX_TITLE_LENGTH` | 96 |
+| `MAX_CROP_TYPE_LENGTH` | 48 |
+| `MAX_LOCATION_LENGTH` | 120 |
+| `MAX_PLAN_LENGTH` | 600 |
+| `MAX_PURPOSE_LENGTH` | 96 |
+| `MAX_CID_LENGTH` | 128 |
+| `MAX_PAGE_SIZE` | 100 |
+
+Keamanan: `SafeERC20` + `ReentrancyGuard`, checks-effects-interactions, tolak
+token fee-on-transfer, satu pengajuan aktif + satu `APPROVED` belum dibayar per
+campaign, pencairan/refund satu kali, tanpa loop tak terbatas pada fungsi tulis.
+
+### Perhitungan voting
+
+- Kuorum = `ceil(totalRaised × 5000 / 10000)`, yaitu
+  `(totalRaised * 5000 + 9999) / 10000`.
+- `totalVoted = yesWeight + noWeight`.
+- `totalVoted < kuorum` (termasuk tanpa suara) → `EXPIRED`.
+- Kuorum tercapai dan `yesWeight > noWeight` → `APPROVED`.
+- Kuorum tercapai dan `yesWeight ≤ noWeight` (termasuk seri) → `REJECTED`.
+
+### Hash manifest
 
 ```
-contracts/            Foundry: src/, test/, script/
-  src/TANIToken.sol           ERC-20 "Tani Token" (TNC), supply tetap 1.000.000
-  src/TANIFaucet.sol          Klaim 100 TNC sekali per alamat
-  src/TaniTraceFunding.sol    Campaign, kontribusi, voting, pencairan, refund
-apps/web/             Next.js App Router
-  app/                        Halaman + API routes (upload, advisory)
-  components/                 UI (campaign, ui)
-  hooks/                      useContractTx, useCampaign, useIPFS, dll.
-  lib/                        ABI, manifest hash, tipe, format, event parser
-  test/                       Vitest (35 test)
-docs/                 PRD, desain, arsitektur, build guide, demo script, tasks
+keccak256(abi.encode(
+  keccak256("TaniTrace.DisbursementManifest.v1"),
+  campaignId, requestId, farmer, amount, purpose, evidenceCid, requestedAt
+))
 ```
 
-Halaman: `/`, `/campaigns`, `/campaigns/new`, `/campaigns/[campaignId]`,
-`/campaigns/[campaignId]/requests/[requestId]`, `/dashboard`, `/audit`,
-`/refund`, `/faucet`.
+`requestedAt` adalah `block.timestamp` saat pengajuan. Frontend mereproduksi nilai
+ini dengan viem (`apps/web/lib/manifest.ts`) dan membandingkannya dengan
+`request.manifestHash`; hasilnya ditampilkan sebagai ✓ cocok / ✗ tidak cocok.
+`evidenceCid` menunjuk bundel JSON bukti di IPFS, bukan hash byte JSON.
 
-## Prasyarat
+### Alamat kontrak
 
-- Foundry (`forge`, `cast`)
-- Node.js 20+ dan Bun
-- Wallet EIP-1193 (MetaMask atau sejenis) di Monad Testnet
-- MON testnet untuk gas (TNC tidak punya nilai uang)
+**Monad Testnet (chain 10143)** — belum di-deploy oleh maintainer. Setelah deploy,
+script menulis [`deployments/monadTestnet.json`](deployments/monadTestnet.json)
+(otomatis dibuat):
 
-## Mulai cepat
+| Kontrak | Alamat |
+| --- | --- |
+| TANIToken (TNC) | `—` (menyusul setelah deploy) |
+| TaniTraceFunding | `—` |
+| TANIFaucet | `—` |
+| Deployer / `deployedAtBlock` | `—` |
+
+Setelah file itu ada, salin nilainya ke `apps/web/.env.local` (lihat tabel
+environment di bawah), lalu restart dev server.
+
+## 💻 Menjalankan di lokal (langkah demi langkah)
+
+Panduan ini ditulis untuk yang belum pernah menjalankan proyek Web3. Ikuti
+urutannya; tidak ada langkah yang butuh akun berbayar.
+
+### 1. Pasang perkakas
+
+| Perkakas | Untuk apa | Cara pasang |
+| --- | --- | --- |
+| **Git** | mengambil kode | [git-scm.com](https://git-scm.com/downloads) |
+| **Node.js 20+** | menjalankan frontend | [nodejs.org](https://nodejs.org) (pilih LTS) |
+| **Bun** | install dependency & script | [bun.sh](https://bun.sh) (`curl -fsSL https://bun.sh/install \| bash`) |
+| **Foundry** | compile/test/deploy kontrak | [book.getfoundry.sh](https://book.getfoundry.sh/getting-started/installation) |
+
+Cek instalasi: `git --version`, `node --version`, `bun --version`, `forge --version`.
+
+### 2. Ambil kode dan dependency
 
 ```bash
-bash contracts/script/setup.sh          # install dependency Foundry
+git clone https://github.com/fardannozami/tani-trace.git
+cd tani-trace
+bash contracts/script/setup.sh          # install OpenZeppelin + forge-std, lalu forge build
+cd apps/web && bun install && cd ../..
+```
+
+### 3. Isi environment
+
+```bash
 cp .env.example contracts/.env
-cd apps/web && cp .env.example .env.local && bun install && cd ../..
+cp apps/web/.env.example apps/web/.env.local
 ```
 
-### 1. Konfigurasi `contracts/.env`
+**`contracts/.env`** (dipakai Foundry):
 
-```env
-PRIVATE_KEY=<private-key-deployer>
-MONAD_TESTNET_RPC=https://testnet-rpc.monad.xyz
-FAUCET_ALLOCATION=200000
-FAUCET_CLAIM_AMOUNT=100
-DEPLOYMENT_OUT=../deployments/monadTestnet.json
-```
+| Variabel | Wajib | Arti |
+| --- | --- | --- |
+| `PRIVATE_KEY` | deploy | private key wallet deployer (jangan di-commit) |
+| `MONAD_TESTNET_RPC` | ya | `https://testnet-rpc.monad.xyz` |
+| `FAUCET_ALLOCATION` | tidak | TNC yang diisi ke faucet saat deploy (default `200000`) |
+| `FAUCET_CLAIM_AMOUNT` | tidak | TNC per klaim (default `100`) |
+| `DEPLOYMENT_OUT` | tidak | path output deploy (default `../deployments/monadTestnet.json`) |
 
-### 2. Deploy ke Monad Testnet
+**`apps/web/.env.local`** (dipakai frontend):
+
+| Variabel | Wajib | Arti |
+| --- | --- | --- |
+| `NEXT_PUBLIC_MONAD_TESTNET_RPC` | ya | RPC Monad Testnet |
+| `NEXT_PUBLIC_TOKEN_ADDRESS` | ya | alamat `TANIToken` |
+| `NEXT_PUBLIC_FUNDING_ADDRESS` | ya | alamat `TaniTraceFunding` |
+| `NEXT_PUBLIC_FAUCET_ADDRESS` | ya | alamat `TANIFaucet` |
+| `NEXT_PUBLIC_DEPLOY_BLOCK` | ya | blok deploy, dipakai membatasi `getLogs` |
+| `NEXT_PUBLIC_IPFS_GATEWAY` | ya | `https://gateway.pinata.cloud` |
+| `PINATA_JWT` | upload | JWT Pinata (server-only) |
+| `PINATA_GATEWAY` | upload | gateway Pinata (server-only) |
+| `UPLOAD_SIGNING_SECRET` | upload | secret HMAC untuk nonce/token (server-only) |
+| `GEMINI_API_KEY` | opsional | kosong = advisory dilewati, alur tetap jalan |
+| `GEMINI_MODEL` | opsional | default `gemini-2.5-flash` |
+
+> Variabel `NEXT_PUBLIC_*` ikut terkirim ke browser. Jangan pernah menaruh secret
+> di prefix itu. Env dibaca saat startup — **restart** dev server setelah diubah.
+
+### 4. Deploy kontrak ke Monad Testnet
+
+Butuh MON testnet di wallet deployer (lihat
+[Coba sekarang](#-coba-sekarang) langkah 3).
 
 ```bash
 cd contracts
-forge build
-forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast
+forge build                 # kompilasi
+forge script script/Deploy.s.sol --rpc-url monad_testnet                 # dry-run
+forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast     # kirim
 ```
 
-Deploy membuat `TANIToken`, `TaniTraceFunding`, `TANIFaucet` (klaim
-`FAUCET_CLAIM_AMOUNT`, default 100 TNC), mentransfer `FAUCET_ALLOCATION` TNC ke
-faucet, dan menulis `deployments/monadTestnet.json` (tiga alamat, deployer,
-`chainId`, `deployedAtBlock`). Forge memuat `contracts/.env` otomatis; jangan
-menaruh private key di argumen CLI.
+Output memuat tiga alamat dan blok deploy. Script juga menulis
+`deployments/monadTestnet.json`. Salin ke `apps/web/.env.local`:
 
-### 3. Konfigurasi `apps/web/.env.local`
+```env
+NEXT_PUBLIC_TOKEN_ADDRESS=0x...
+NEXT_PUBLIC_FUNDING_ADDRESS=0x...
+NEXT_PUBLIC_FAUCET_ADDRESS=0x...
+NEXT_PUBLIC_DEPLOY_BLOCK=12345678
+```
 
-| Variabel | Wajib | Keterangan |
-|---|---|---|
-| `NEXT_PUBLIC_MONAD_TESTNET_RPC` | ya | RPC Monad Testnet |
-| `NEXT_PUBLIC_TOKEN_ADDRESS` | ya | Alamat `TANIToken` |
-| `NEXT_PUBLIC_FUNDING_ADDRESS` | ya | Alamat `TaniTraceFunding` |
-| `NEXT_PUBLIC_FAUCET_ADDRESS` | ya | Alamat `TANIFaucet` |
-| `NEXT_PUBLIC_DEPLOY_BLOCK` | ya | Blok deployment untuk rentang `getLogs` |
-| `NEXT_PUBLIC_IPFS_GATEWAY` | ya | Gateway untuk membuka bukti |
-| `PINATA_JWT` | upload | JWT Pinata (server-only) |
-| `PINATA_GATEWAY` | upload | Gateway Pinata (server-only) |
-| `UPLOAD_SIGNING_SECRET` | upload | Secret HMAC nonce/token (server-only) |
-| `GEMINI_API_KEY` | opsional | Kosong = advisory dilewati |
-| `GEMINI_MODEL` | opsional | Default `gemini-2.5-flash` |
-
-`NEXT_PUBLIC_*` ter-inline ke bundel browser — jangan menaruh secret di prefix
-itu. Env dibaca saat startup, jadi **restart** `bun run dev` setelah mengubahnya.
-
-### 4. Jalankan frontend
+Verifikasi source (opsional, konfigurasi Sourcify Monad sudah ada di
+`foundry.toml`):
 
 ```bash
-cd apps/web && bun run dev
+forge verify-contract <ALAMAT> src/TaniTraceFunding.sol:TaniTraceFunding \
+  --verifier sourcify \
+  --verifier-url https://sourcify-api-monad.blockvision.org/
 ```
 
-Buka `http://localhost:3000`, hubungkan wallet, dan pastikan jaringan Monad
-Testnet (chain ID `10143`). Transaksi di chain lain ditolak sebelum dikirim.
-
-## Verifikasi
+### 5. Jalankan frontend
 
 ```bash
-cd contracts && forge build && forge test        # 95 test
-cd apps/web && npx tsc --noEmit                  # typecheck
-cd apps/web && bun run lint                      # ESLint 9 (0 masalah)
-cd apps/web && bun run test                      # 35 test (Vitest)
-cd apps/web && bun run build                     # production build
+cd apps/web
+bun run dev        # http://localhost:3000
 ```
 
-Script bantuan: `bash apps/web/scripts/sync-abi.sh` menyegarkan ABI frontend dari
-`contracts/out` setelah kontrak berubah.
+Buka halaman, hubungkan wallet, pindahkan jaringan ke Monad Testnet
+(chain ID `10143`). Jika alamat kontrak masih kosong, aplikasi menampilkan
+petunjuk konfigurasi, bukan error.
 
-## Alur demo (ringkas)
+### 6. Perintah lain yang berguna
 
-1. `/faucet` — klaim 100 TNC (sekali per wallet).
-2. `/campaigns/new` — buat campaign (judul, tanaman, lokasi, rencana, target,
-   deadline).
-3. `/campaigns/[id]` — investor approve allowance lalu `contribute` hingga target;
-   campaign otomatis `ACTIVE`.
-4. `/dashboard` — petani unggah bukti ke IPFS (opsional advisory), lalu kirim
-   `requestDisbursement` (status `PENDING`, voting 24 jam).
-5. `/campaigns/[id]/requests/[requestId]` — verifikasi `manifestHash`, investor
-   vote YES/NO; setelah deadline siapa pun `finalizeRequest`.
-6. Jika `APPROVED`, petani `payDisbursement` (status `PAID`); lalu
-   `completeCampaign` setelah tidak ada kewajiban tersisa.
-7. `/audit` — seluruh event on-chain tampil dengan tautan explorer.
-8. Skenario negatif: campaign di bawah target → `FAILED` → `/refund`.
+```bash
+cd apps/web
+bun run typecheck     # tsc --noEmit
+bun run lint          # ESLint 9
+bun run test          # Vitest (35 test)
+bun run build         # production build
+bash scripts/sync-abi.sh   # segarkan ABI frontend dari contracts/out
+```
 
-Time warp lokal: `cast rpc evm_increaseTime 86401 && cast rpc evm_mine`.
-Detail langkah ada di [`docs/demo-script.md`](docs/demo-script.md) dan
-[`docs/monad-blitz-build-guide.md`](docs/monad-blitz-build-guide.md).
+## 📱 Skenario demo
 
-## Batasan dan keamanan
+Durasi ±2–3 menit. Detail per adegan: [`docs/demo-script.md`](docs/demo-script.md).
 
-- Kontrak **belum diaudit**; MVP hackathon, jangan dipakai untuk dana sungguhan.
-- TNC token simulasi tanpa nilai uang; pengguna membayar gas dalam MON.
-- Tidak ada resistensi Sybil (faucet satu klaim per alamat).
-- Kontrak tidak membuktikan kebenaran isi bukti IPFS maupun penggunaan dana;
-  IPFS hanya membuktikan kecocokan konten terhadap referensi yang tercatat.
-- Advisory AI dapat salah atau terpengaruh prompt injection dan tidak pernah
-  menjadi keputusan on-chain; laporan di bundel IPFS adalah klaim yang tidak
-  diverifikasi ulang.
-- Rate limit advisory bersifat in-memory per proses server (6/10 menit per
-  alamat), bukan perlindungan produksi.
-- RPC publik membatasi rentang `getLogs`; atur `NEXT_PUBLIC_DEPLOY_BLOCK`.
-- `getCampaign` mengembalikan array `contributors`/`requestIds` penuh; hanya
-  list view yang ber-paginasi (maks 100).
+| # | Adegan | Halaman | Hasil on-chain |
+| --- | --- | --- | --- |
+| 1 | Klaim TNC | `/faucet` | `Claimed` di faucet; saldo +100 TNC |
+| 2 | Buat campaign | `/campaigns/new` | `CampaignCreated`, status `FUNDING` |
+| 3 | Dua investor kontribusi sampai target | `/campaigns/[id]` | `ContributionMade` per investor, `CampaignActivated`, status `ACTIVE` |
+| 4 | Upload bukti + ajukan pencairan | `/dashboard` | berkas + manifest di IPFS; `DisbursementRequested`, `PENDING`, `manifestHash` |
+| 5 | Verifikasi hash + vote YES | halaman request | hash ✓ cocok; `VoteCast` dengan bobot kontribusi |
+| 6 | Time warp 24 jam + finalisasi | halaman request / terminal | `RequestFinalized` → `APPROVED` |
+| 7 | Pencairan | halaman request | `DisbursementPaid`, status `PAID`, `releasedTotal` naik |
+| 8 | Tutup siklus | `/dashboard` | `CampaignCompleted`, status `COMPLETED` |
+| 9 | Audit | `/audit` | seluruh event dengan tautan explorer |
+| 10 | (Opsional) jalur gagal | `/campaigns/new` → `/refund` | `CampaignFailed`, `RefundClaimed` |
 
-## Dokumentasi
+Time warp lokal:
+
+```bash
+cast rpc evm_increaseTime 86401
+cast rpc evm_mine
+```
+
+## 🤖 Pemeriksaan awal bukti (advisory AI)
+
+Opsional. Tanpa `GEMINI_API_KEY`, semua alur tetap berjalan dan UI hanya
+menampilkan catatan bahwa pemeriksaan awal tidak tersedia.
+
+1. Setelah berkas diunggah ke IPFS dan sebelum manifest di-pin, frontend memanggil
+   `POST /api/evidence/advisory`.
+2. Route memakai otorisasi yang sama dengan upload: nonce (5 menit), tanda tangan
+   EIP-191 dari wallet, dan token HMAC. Tidak ada kredensial model di browser.
+3. Hanya JPEG/PNG/PDF yang diperiksa (maks 4 berkas, 4 MB/berkas, 8 MB total).
+4. Output model dinormalisasi server-side menjadi verdict, ringkasan, temuan,
+   waktu, model, dan disclaimer tetap.
+5. Hasil disimpan di manifest IPFS sebagai field `advisory` — **tidak** on-chain,
+   **tidak** ikut `manifestHash`, tidak pernah dibaca contract.
+6. Kode yang mungkin muncul: `AI_NOT_CONFIGURED`, `AI_FAILED`, `RATE_LIMITED`,
+   `BAD_FILE_COUNT`, `BAD_MIME`, `FILE_TOO_LARGE`, `BUNDLE_TOO_LARGE`,
+   `BAD_PURPOSE`, `BAD_AMOUNT`, `UPLOAD_NOT_CONFIGURED`.
+7. Throttle 6 panggilan / 10 menit per alamat (in-memory per proses server, bukan
+   rate limit produksi).
+
+Manifest yang dibaca kembali dari IPFS ditandai sebagai isi bundel yang **tidak
+diverifikasi ulang**, karena diunggah oleh pemohon.
+
+## 🧪 Test
+
+```bash
+cd contracts && forge build && forge test    # 95 test Foundry
+cd apps/web && bun run test                  # 35 test Vitest
+cd apps/web && bun run typecheck && bun run lint && bun run build
+```
+
+Foundry (95) mencakup: pendanaan sukses/aktivasi, deadline habis + refund, akses
+tanpa hak, nominal tidak valid dan escrow kurang, kontribusi melebihi sisa target,
+fee-on-transfer, voting non-investor dan dobel, kuorum dengan pembulatan ke atas,
+mayoritas YES/NO/seri, finalisasi sebelum deadline, pencairan dobel, refund dobel,
+refund campaign sukses, pengajuan pada campaign gagal/selesai, penutupan campaign
+dengan kewajiban tersisa, reentrancy dan kegagalan transfer, emisi event, invariant
+escrow, serta paginasi.
+
+Frontend (35) mencakup: paritas `computeManifestHash` dengan kontrak (diverifikasi
+silang Solidity ↔ viem), invarians hash ketika `advisory` ada/tidak ada,
+serialisasi manifest, validasi MIME/ukuran, format angka/tanggal/alamat, helper
+tipe (`availableEscrow`, `quorumRequired`, `totalVoted`), dan normalisasi output
+advisory.
+
+## 🗂️ Struktur repo
+
+```text
+contracts/   Foundry: src/ (3 kontrak), test/ (95 test), script/ (Deploy, setup.sh)
+apps/web/    Next.js App Router
+  app/        9 halaman + 4 route API (upload, nonce, manifest, advisory)
+  components/ UI campaign & ui
+  hooks/      useContractTx, useCampaign(s), useCampaignActions, useWallet, useTokenInfo, useIPFS, useAuditFeed, useNowSeconds
+  lib/        ABI, alamat, manifest hash, tipe, format, event parser
+  test/       Vitest (35 test)
+docs/        PRD, desain, arsitektur, build guide, demo script, tasks
+deployments/ hasil deploy (dibuat otomatis; belum ada sampai deploy dijalankan)
+```
+
+## 🧰 Kalau ada masalah
+
+| Gejala | Penyebab & solusi |
+| --- | --- |
+| Transaksi ditolak sebelum terkirim | Wallet bukan di Monad Testnet (10143). Pindahkan jaringan. |
+| Faucet error / kosong | Saldo faucet habis → transfer manual TNC, atau redeploy dengan `FAUCET_ALLOCATION` lebih besar. |
+| Upload 503 / `UPLOAD_NOT_CONFIGURED` | `PINATA_JWT` kosong atau server belum di-restart. |
+| Upload 415 | Tipe berkas tidak didukung. Gunakan JPEG, PNG, PDF, atau JSON. |
+| Upload 413 | Berkas > 4 MB atau bundel > 8 MB. |
+| Upload 401 / `INVALID_NONCE` | Nonce kedaluwarsa (5 menit) atau wallet berbeda; ulangi dari awal. |
+| Kartu advisory tidak muncul | `GEMINI_API_KEY` kosong atau model gagal (`AI_FAILED`). Upload tetap sah. |
+| `RATE_LIMITED` | Batas advisory 6 panggilan / 10 menit per alamat. |
+| Data tidak termuat / `getLogs` error | RPC publik membatasi rentang blok. Isi `NEXT_PUBLIC_DEPLOY_BLOCK`. |
+| Perubahan `.env` tidak berpengaruh | Env dibaca saat startup — hentikan dan jalankan ulang dev server. |
+| Transaksi revert | Cek status campaign/pengajuan, allowance TNC, dan escrow tersedia. Tidak ada retry otomatis. |
+| "Manifest tidak cocok" | Field `(campaignId, requestId, farmer, amount, purpose, evidenceCid, requestedAt)` harus identik dengan yang on-chain. |
+| Build gagal `@x402/*` | Dependensi opsional wagmi belum terpasang: `cd apps/web && bun install`. |
+| Build gagal `no direct app page entry` | Cache `.next` basi: `rm -rf apps/web/.next && bun run build`. |
+
+## 📝 Catatan jujur
+
+- **Belum di-deploy** ke Monad Testnet oleh maintainer; belum ada alamat publik,
+  demo live, atau screenshot. Bagian alamat akan diisi setelah deploy pertama.
+- **TNC adalah token simulasi** tanpa nilai uang; gas dibayar dalam MON testnet.
+- **Tidak ada resistensi Sybil.** Faucet satu klaim per alamat bukan perlindungan
+  produksi; wallet bisa dibuat banyak.
+- **Bukti tidak membuktikan kebenaran.** IPFS membuktikan kecocokan konten
+  terhadap referensi yang tercatat, bukan bahwa foto/nota itu asli atau dana
+  dipakai sesuai tujuan.
+- **AI bisa salah.** Advisory dapat keliru, tidak lengkap, atau terpengaruh prompt
+  injection dari teks di dalam berkas; hasilnya tidak pernah menjadi keputusan
+  on-chain dan tidak diverifikasi ulang saat dibaca dari IPFS.
+- **Kontrak belum diaudit.** MVP hackathon; jangan dipakai untuk dana sungguhan.
+- **Rate limit advisory** hanya in-memory per proses server.
+- **RPC publik** membatasi `eth_getLogs`; aplikasi memakai rentang blok terbatas.
+- **`getCampaign` mengembalikan array penuh** (`contributors`, `requestIds`);
+  hanya list view yang ber-paginasi (maks 100).
+- **Tanpa admin, pause, atau upgrade path.** Sisa escrow yang tidak diajukan tetap
+  di contract dan tidak bisa diambil sepihak.
+
+## 🔭 Di luar lingkup MVP
+
+Uang sungguhan, imbal hasil/yield, verifikasi identitas atau anti-Sybil produksi,
+pencairan otomatis yang dipicu panen, backend/database permanen, AI sebagai
+pemegang keputusan, transaksi tanpa gas, dan audit keamanan pihak ketiga.
+
+## 📚 Dokumentasi
 
 - [`docs/tani-trace.md`](docs/tani-trace.md) — PRD v2.0
-- [`docs/design.md`](docs/design.md) — desain teknis
+- [`docs/design.md`](docs/design.md) — desain teknis (state machine, voting, hash)
 - [`docs/architecture.md`](docs/architecture.md) — komponen, invariant, trust boundary
-- [`docs/monad-blitz-build-guide.md`](docs/monad-blitz-build-guide.md) — rebuild + demo
+- [`docs/monad-blitz-build-guide.md`](docs/monad-blitz-build-guide.md) — rebuild & demo
 - [`docs/demo-script.md`](docs/demo-script.md) — skrip demo 2–3 menit
-- [`docs/tasks.md`](docs/tasks.md) — status pekerjaan
+- [`docs/tasks.md`](docs/tasks.md) — status pekerjaan per item
 
-Kontrak tidak memiliki admin, pause, atau upgrade path. Sisa escrow yang tidak
-pernah diajukan tetap berada di contract dan tidak dapat diambil sepihak.
+## 📄 Lisensi
+
+Belum ada file lisensi di repo ini. Tambahkan `LICENSE` sebelum publikasi jika
+kode akan dipakai pihak lain. Kode kontrak mengikuti pola OpenZeppelin (MIT) untuk
+library yang diimpor.
+
+<div align="center"><sub>Dibuat untuk petani Indonesia · Monad Testnet · TNC adalah token simulasi tanpa nilai uang</sub></div>
