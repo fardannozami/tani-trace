@@ -1,17 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Navigation } from "../../../../../components/Navigation";
 import { useWallet } from "../../../../../hooks/useWallet";
 import { useCampaign } from "../../../../../hooks/useCampaign";
 import { useVote } from "../../../../../hooks/useCampaign";
-import { useContractTx } from "../../../../../hooks/useContractTx";
 import { useCampaignActions } from "../../../../../hooks/useCampaignActions";
 import { useNowSeconds } from "../../../../../hooks/useNowSeconds";
 import { usePublicClient } from "wagmi";
 import { FUNDING_ADDRESS, abi, isConfigured, EXPLORER_URL } from "../../../../../lib/contract";
+import { decodeRequest } from "../../../../../lib/decode";
 import { formatTani, formatDate } from "../../../../../lib/format";
-import { quorumRequired, totalVoted } from "../../../../../lib/types";
+import { quorumRequired, totalVoted, type Request } from "../../../../../lib/types";
 import { verifyManifestHash, type EvidenceManifest } from "../../../../../lib/manifest";
 import { StatusBadge } from "../../../../../components/campaign/StatusBadge";
 import { ErrorMessage } from "../../../../../components/ui/ErrorMessage";
@@ -25,41 +25,29 @@ export default function RequestDetail() {
   const { address, isConnected, isMonad } = useWallet();
   const { campaign } = useCampaign(campaignId);
   const publicClient = usePublicClient();
-  const [req, setReq] = useState<Record<string, unknown> | null>(null);
+  const [request, setRequest] = useState<Request | null>(null);
   const [loaded, setLoaded] = useState(false);
   const { data: voted } = useVote(requestId, address);
-  const { status, error, reset } = useContractTx();
   const actions = useCampaignActions();
   const now = useNowSeconds();
 
-  // load request
-  async function load() {
+  useEffect(() => {
     if (!publicClient) return;
-    try {
-      const raw = await publicClient.readContract({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "requests", args: [requestId] });
-      setReq(raw as Record<string, unknown>);
-    } catch {}
-    setLoaded(true);
-  }
-  if (!loaded) load();
+    let cancelled = false;
+    publicClient
+      .readContract({ address: FUNDING_ADDRESS, abi: abi.funding, functionName: "requests", args: [requestId] })
+      .then((raw) => {
+        if (!cancelled) setRequest(decodeRequest(requestId, raw as readonly unknown[]));
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoaded(true);
+      });
+    return () => { cancelled = true; };
+  }, [publicClient, requestId]);
 
   if (!isConfigured) return <><Navigation /><main className="page"><div className="notice">Kontrak belum dikonfigurasi.</div></main></>;
-  if (!loaded || !req) return <><Navigation /><main className="page"><p>Memuat...</p></main></>;
-
-  const request = {
-    id: requestId,
-    campaignId: req.campaignId as bigint,
-    farmer: req.farmer as `0x${string}`,
-    amount: req.amount as bigint,
-    purpose: req.purpose as string,
-    evidenceCid: req.evidenceCid as string,
-    manifestHash: req.manifestHash as `0x${string}`,
-    requestedAt: req.requestedAt as bigint,
-    votingDeadline: req.votingDeadline as bigint,
-    yesWeight: req.yesWeight as bigint,
-    noWeight: req.noWeight as bigint,
-    status: req.status as number,
-  };
+  if (!loaded || !request) return <><Navigation /><main className="page"><p>Memuat...</p></main></>;
 
   const manifest: EvidenceManifest = {
     campaignId: request.campaignId,
@@ -85,28 +73,28 @@ export default function RequestDetail() {
         <h1>Request pencairan</h1>
         <p>Jumlah: {formatTani(request.amount)} TNC · Tujuan: {request.purpose}</p>
         <p>Status: <StatusBadge status={request.status} domain="request" /></p>
-        <p>Voting berakhir: {formatDate(request.votingDeadline)} {now < Number(request.votingDeadline) ? `(${Number(request.votingDeadline)-now}s lagi)` : "(selesai)"}</p>
+        <p>Voting berakhir: {formatDate(request.votingDeadline)}{now !== null ? ` ${now < Number(request.votingDeadline) ? `(${Number(request.votingDeadline)-now}s lagi)` : "(selesai)"}` : ""}</p>
         <p>Bobot YES: {formatTani(request.yesWeight)} · NO: {formatTani(request.noWeight)} · Total: {formatTani(total)} · Quorum: {formatTani(qr)}</p>
         <p>Manifest hash: {hashMatch ? "✓ cocok" : "✗ tidak cocok"}</p>
         <p>Bukti: <a href={evidenceUrl} target="_blank" rel="noopener noreferrer">{request.evidenceCid}</a></p>
 
-        {error ? <ErrorMessage error={error} onRetry={reset} /> : null}
-        <TransactionStatus status={status} explorerUrl={EXPLORER_URL} />
+        {actions.error ? <ErrorMessage error={actions.error} onRetry={actions.reset} /> : null}
+        <TransactionStatus status={actions.status} txHash={actions.txHash ?? undefined} explorerUrl={EXPLORER_URL} />
 
-        {isConnected && !voted && request.status === 0 && now < Number(request.votingDeadline) ? (
+        {isConnected && now !== null && !voted && request.status === 0 && now < Number(request.votingDeadline) ? (
           <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-            <button type="button" className="button" onClick={() => actions.vote(requestId, true)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Vote YA</button>
-            <button type="button" className="button secondary" onClick={() => actions.vote(requestId, false)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Vote TIDAK</button>
+            <button type="button" className="button" onClick={() => actions.vote(requestId, true)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Vote YA</button>
+            <button type="button" className="button secondary" onClick={() => actions.vote(requestId, false)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Vote TIDAK</button>
           </div>
         ) : null}
         {voted ? <p>Anda sudah memberikan suara.</p> : null}
 
-        {now >= Number(request.votingDeadline) && request.status === 0 ? (
-          <button type="button" className="button secondary" style={{ marginTop: 16 }} onClick={() => actions.finalizeRequest(requestId)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Finalisasi pengajuan</button>
+        {now !== null && now >= Number(request.votingDeadline) && request.status === 0 ? (
+          <button type="button" className="button secondary" style={{ marginTop: 16 }} onClick={() => actions.finalizeRequest(requestId)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Finalisasi pengajuan</button>
         ) : null}
 
         {request.status === 1 && isConnected && address === request.farmer ? (
-          <button type="button" className="button" style={{ marginTop: 16 }} onClick={() => actions.payDisbursement(requestId)} disabled={!isMonad || status === "pending" || status === "awaiting-wallet"}>Bayar pencairan</button>
+          <button type="button" className="button" style={{ marginTop: 16 }} onClick={() => actions.payDisbursement(requestId)} disabled={!isMonad || actions.status === "pending" || actions.status === "awaiting-wallet"}>Bayar pencairan</button>
         ) : null}
       </main>
     </>

@@ -10,17 +10,13 @@ export function secret() {
 export function issueNonce(address: string) {
   const nonce = crypto.randomBytes(16).toString("hex");
   const expiresAt = Date.now() + NONCE_TTL_MS;
-  const token = crypto.createHmac("sha256", secret()).update(`${nonce}:${address}:${expiresAt}`).digest("hex");
-  store.set(nonce, { address: String(address).toLowerCase(), expires: expiresAt });
+  // PENTING: alamat harus lowercase di kedua sisi (issue & verify), karena
+  // wallet mengirim alamat checksummed (EIP-55) sedangkan verifyAuth
+  // menormalisasi ke lowercase. Tanpa ini token selalu INVALID_TOKEN.
+  const normalized = String(address).toLowerCase();
+  const token = crypto.createHmac("sha256", secret()).update(`${nonce}:${normalized}:${expiresAt}`).digest("hex");
+  store.set(nonce, { address: normalized, expires: expiresAt });
   return { nonce, token, expiresAt };
-}
-
-export function verifyNonce(nonce: string, address: string): boolean {
-  const rec = store.get(nonce);
-  if (!rec) return false;
-  if (rec.expires < Date.now()) { store.delete(nonce); return false; }
-  if (rec.address !== String(address).toLowerCase()) return false;
-  return true;
 }
 
 export function consumeNonce(nonce: string) {

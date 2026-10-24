@@ -26,10 +26,11 @@ export async function POST(req: NextRequest) {
   const signature = String(form.get("signature") || "");
   const purpose = String(form.get("purpose") || "");
   const notes = String(form.get("notes") || "").slice(0, 400);
+  const expiresAt = Number(form.get("expiresAt") || 0);
 
   // size for auth message
   const totalSize = files.reduce((a, f) => a + (f?.size || 0), 0);
-  const auth = await verifyAuth({ address, nonce, token, signature }, `TaniTrace advisory\nnonce:${nonce}\ntoken:${token}\nsize:${totalSize}`);
+  const auth = await verifyAuth({ address, nonce, token, signature, expiresAt }, `TaniTrace advisory\nnonce:${nonce}\ntoken:${token}\nsize:${totalSize}`);
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status || 401 });
 
   if (files.length < 1 || files.length > 4) return NextResponse.json({ error: "BAD_FILE_COUNT" }, { status: 400 });

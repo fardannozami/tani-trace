@@ -2,67 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePublicClient, useAccount } from "wagmi";
 import { FUNDING_ADDRESS, abi } from "../lib/contract";
-import { CampaignStatus, RequestStatus, type Campaign, type Request } from "../lib/types";
-
-function toCampaign(id: bigint, raw: unknown): Campaign {
-  const r = raw as {
-    farmer: `0x${string}`;
-    title: string;
-    crop: string;
-    location: string;
-    plan: string;
-    targetAmount: bigint;
-    totalRaised: bigint;
-    releasedTotal: bigint;
-    fundingDeadline: bigint;
-    status: number | bigint;
-    contributors: `0x${string}`[] | null | undefined;
-  };
-  return {
-    id,
-    farmer: r.farmer,
-    title: r.title,
-    crop: r.crop,
-    location: r.location,
-    plan: r.plan,
-    targetAmount: r.targetAmount,
-    totalRaised: r.totalRaised,
-    releasedTotal: r.releasedTotal,
-    fundingDeadline: r.fundingDeadline,
-    status: r.status as CampaignStatus,
-    contributors: r.contributors ?? [],
-  };
-}
-
-function toRequest(id: bigint, raw: unknown): Request {
-  const r = raw as {
-    campaignId: bigint;
-    farmer: `0x${string}`;
-    amount: bigint;
-    purpose: string;
-    evidenceCid: string;
-    manifestHash: `0x${string}`;
-    requestedAt: bigint;
-    votingDeadline: bigint;
-    yesWeight: bigint;
-    noWeight: bigint;
-    status: number | bigint;
-  };
-  return {
-    id,
-    campaignId: r.campaignId,
-    farmer: r.farmer,
-    amount: r.amount,
-    purpose: r.purpose,
-    evidenceCid: r.evidenceCid,
-    manifestHash: r.manifestHash,
-    requestedAt: r.requestedAt,
-    votingDeadline: r.votingDeadline,
-    yesWeight: r.yesWeight,
-    noWeight: r.noWeight,
-    status: r.status as RequestStatus,
-  };
-}
+import { decodeCampaign, decodeRequest } from "../lib/decode";
+import type { Request } from "../lib/types";
 
 export function useCampaign(campaignId: bigint | undefined) {
   const publicClient = usePublicClient();
@@ -78,7 +19,7 @@ export function useCampaign(campaignId: bigint | undefined) {
         functionName: "campaigns",
         args: [campaignId!],
       });
-      return toCampaign(campaignId!, raw);
+      return decodeCampaign(campaignId!, raw as readonly unknown[]);
     },
   });
 
@@ -109,7 +50,7 @@ export function useCampaign(campaignId: bigint | undefined) {
           functionName: "requests",
           args: [rid],
         });
-        out.push(toRequest(rid, raw));
+        out.push(decodeRequest(rid, raw as readonly unknown[]));
       }
       return out;
     },

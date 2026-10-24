@@ -25,7 +25,7 @@ export function useTokenInfo() {
     abi: abi.faucet,
     functionName: "claimAmount",
   });
-  const { execute, status } = useContractTx();
+  const { execute, status, txHash, error, reset } = useContractTx();
   async function claim() {
     return execute({ address: FAUCET_ADDRESS, abi: abi.faucet, functionName: "claim", args: [] });
   }
@@ -35,6 +35,9 @@ export function useTokenInfo() {
     claimAmount: (claimAmount.data as bigint | undefined) ?? 0n,
     claim,
     status,
+    txHash,
+    error,
+    reset,
     refetch: balance.refetch,
   };
 }

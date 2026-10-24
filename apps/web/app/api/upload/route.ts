@@ -14,10 +14,11 @@ export async function POST(req: NextRequest) {
   const signature = String(form.get("signature") || "");
   const size = Number(form.get("size") || 0);
   const name = String(form.get("name") || file?.name || "");
+  const expiresAt = Number(form.get("expiresAt") || 0);
 
   if (!file) return NextResponse.json({ error: "BAD_FILE" }, { status: 400 });
 
-  const auth = await verifyAuth({ address, nonce, token, signature, size, name }, `TaniTrace upload\nnonce:${nonce}\ntoken:${token}\nsize:${size}\nname:${name}`);
+  const auth = await verifyAuth({ address, nonce, token, signature, size, name, expiresAt }, `TaniTrace upload\nnonce:${nonce}\ntoken:${token}\nsize:${size}\nname:${name}`);
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status || 401 });
 
   const mime = file.type || "";

@@ -5,7 +5,7 @@ import { Navigation } from "../../../components/Navigation";
 import { useWallet } from "../../../hooks/useWallet";
 import { useContractTx } from "../../../hooks/useContractTx";
 import { parseEventLogs } from "viem";
-import { FUNDING_ADDRESS, abi, isConfigured } from "../../../lib/contract";
+import { FUNDING_ADDRESS, abi, isConfigured, EXPLORER_URL } from "../../../lib/contract";
 import { ErrorMessage } from "../../../components/ui/ErrorMessage";
 import { TransactionStatus } from "../../../components/ui/TransactionStatus";
 
@@ -14,7 +14,7 @@ const LIMITS = { title: 96, crop: 48, location: 120, plan: 600 };
 export default function NewCampaign() {
   const router = useRouter();
   const { isConnected, isMonad } = useWallet();
-  const { execute, status, error, reset } = useContractTx();
+  const { execute, status, error, txHash, reset } = useContractTx();
   const [title, setTitle] = useState("");
   const [crop, setCrop] = useState("");
   const [location, setLocation] = useState("");
@@ -77,7 +77,7 @@ export default function NewCampaign() {
         {!isConfigured ? <div className="notice">Kontrak belum dikonfigurasi.</div> : null}
         {localError ? <ErrorMessage error={localError} /> : null}
         {error ? <ErrorMessage error={error} onRetry={reset} /> : null}
-        <TransactionStatus status={status} />
+        <TransactionStatus status={status} txHash={txHash ?? undefined} explorerUrl={EXPLORER_URL} />
         <form onSubmit={onSubmit} style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12, maxWidth: 640 }}>
           <label>Judul<input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={LIMITS.title} required /></label>
           <label>Jenis tanaman<input value={crop} onChange={(e) => setCrop(e.target.value)} maxLength={LIMITS.crop} required /></label>

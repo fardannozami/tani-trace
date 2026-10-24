@@ -2,7 +2,7 @@
 import { Navigation } from "../../components/Navigation";
 import { useWallet } from "../../hooks/useWallet";
 import { useTokenInfo } from "../../hooks/useTokenInfo";
-import { isConfigured } from "../../lib/contract";
+import { isConfigured, EXPLORER_URL } from "../../lib/contract";
 import { formatTani } from "../../lib/format";
 import { TransactionStatus } from "../../components/ui/TransactionStatus";
 
@@ -22,7 +22,8 @@ export default function Faucet() {
         <p>Satu wallet dapat mengklaim {formatTani(info.claimAmount)} TNC simulasi.</p>
         <p>Saldo Anda: {formatTani(info.balance)} TNC</p>
         <p>Status klaim: {info.claimed ? "Sudah diklaim" : "Belum diklaim"}</p>
-        <TransactionStatus status={info.status} />
+        {info.error ? <p className="notice">{info.error}</p> : null}
+        <TransactionStatus status={info.status} txHash={info.txHash ?? undefined} explorerUrl={EXPLORER_URL} />
         <button
           type="button"
           className="button"
