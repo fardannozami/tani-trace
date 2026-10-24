@@ -93,11 +93,7 @@ Semua smart contract telah terdeploy dan diverifikasi di **Monad Testnet (Chain 
 | **Verifikasi Sourcify** | [Job ID: `ca5c2012-acd9-4c72-8120-77988677d919`](https://sourcify-api-monad.blockvision.org/verify-ui/jobs/ca5c2012-acd9-4c72-8120-77988677d919) |
 | **Total Pasokan** | `1.000.000 TNC` (Alokasi Faucet: `200.000 TNC`, Klaim: `100 TNC`/alamat) |
 
-### 🏛️ Kontrak Modular (Multi-Contract Architecture)
-*Tersedia pula opsi arsitektur terpisah 3 kontrak:*
-- **TANIToken (TNC):** [`0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3`](https://testnet.monadexplorer.com/address/0x25e6a951D7a3d7F5C76BF24E098E7878f37007f3)
-- **TaniTraceFunding:** [`0xE4b10b2b7185042F671Aee32aa3E941544A8675d`](https://testnet.monadexplorer.com/address/0xE4b10b2b7185042F671Aee32aa3E941544A8675d)
-- **TANIFaucet:** [`0xBF28435F8654ece0A0C37a3476b682dFd596Eb52`](https://testnet.monadexplorer.com/address/0xBF28435F8654ece0A0C37a3476b682dFd596Eb52)
+> **Catatan Arsitektur:** Seluruh fungsi protokol (pencetakan token, faucet 100 TNC, pembuatan kampanye, voting desentralisasi, dan pencairan dana bertahap) disatukan dalam satu smart contract **`TANIToken`**. Tidak diperlukan deployment terpisah untuk faucet atau funding.
 
 ---
 
